@@ -22,6 +22,15 @@ public class OnlineAdminRow {
 	private int user_id, active, pending, resolved;
 	private boolean isOnline;
 
+	public OnlineAdminRow(String adminName, int uId, int active, int pending, int resolved, boolean isOnLine) {
+		this.name = adminName;
+		this.user_id = uId;
+		this.active = active;
+		this.pending = pending;
+		this.resolved = resolved;
+		this.isOnline = isOnLine;
+	}
+
 	/**
 	 * @return the adminName
 	 */
@@ -113,7 +122,8 @@ public class OnlineAdminRow {
 	}
 
 	/**
-	 * @param adminArray as JSONArray
+	 * @param adminArray
+	 *            as JSONArray
 	 * @return parsed adminList
 	 */
 	public static ArrayList<OnlineAdminRow> parseNotifList(JSONArray adminArray) {

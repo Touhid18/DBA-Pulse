@@ -103,7 +103,7 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/lv_notifs"
+        android:id="@+id/lv_jobs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -112,7 +112,7 @@
     </ListView>
 
     <ImageView
-        android:id="@+id/iv_refresh"
+        android:id="@+id/iv_refresh_jobs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

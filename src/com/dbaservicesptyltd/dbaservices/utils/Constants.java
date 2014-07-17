@@ -37,4 +37,12 @@ public class Constants {
 	public static final String USER_LAST_NAME = "com.dbaservicesptyltd.dbaservices.ULNAME";
 	public static final String USER_EMAIL = "com.dbaservicesptyltd.dbaservices.UEMAIL";
 
+	/** Intent extra constant keys */
+	public static final String U_ID = "com.dbaservicesptyltd.dbaservices.U_ID";
+	public static final String U_NAME = "com.dbaservicesptyltd.dbaservices.UNAME";
+	public static final String U_ACTIVE_COUNT = "com.dbaservicesptyltd.dbaservices.UACTIVE";
+	public static final String U_PENDING_COUNT = "com.dbaservicesptyltd.dbaservices.UPENDING";
+	public static final String U_RESOLVED_COUNT = "com.dbaservicesptyltd.dbaservices.URESOLVED";
+	public static final String U_IS_ONLINE = "com.dbaservicesptyltd.dbaservices.UONLINE";
+
 }

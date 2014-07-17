@@ -72,7 +72,12 @@ public class OnlineAdminFragment extends Fragment {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				OnlineAdminRow admin = (OnlineAdminRow) parent.getItemAtPosition(position);
 				Intent intent = new Intent(tContext, JobsInProgressActivity.class);
-				intent.putExtra(Constants.USER_ID, admin.getUserId());
+				intent.putExtra(Constants.U_ID, admin.getUserId());
+				intent.putExtra(Constants.U_NAME, admin.getAdminName());
+				intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
+				intent.putExtra(Constants.U_PENDING_COUNT, admin.getPending());
+				intent.putExtra(Constants.U_RESOLVED_COUNT, admin.getResolved());
+				intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
 				startActivity(intent);
 			}
 		});

@@ -215,13 +215,15 @@ public final class R {
         public static final int btn_msg_admin=0x7f080008;
         public static final int et_pwd=0x7f08000c;
         public static final int et_user_email=0x7f08000b;
-        public static final int iv_refresh=0x7f08000a;
+        public static final int iv_refresh=0x7f080012;
         public static final int iv_refresh_admin=0x7f08000f;
+        public static final int iv_refresh_jobs=0x7f08000a;
         public static final int iv_status=0x7f080003;
         public static final int iv_top_logo=0x7f080001;
         public static final int ll_admin_holder=0x7f080002;
         public static final int lv_admins=0x7f080010;
-        public static final int lv_notifs=0x7f080009;
+        public static final int lv_jobs=0x7f080009;
+        public static final int lv_notifs=0x7f080011;
         public static final int pager=0x7f080000;
         public static final int tv_active_count=0x7f080005;
         public static final int tv_admin_name=0x7f080004;
