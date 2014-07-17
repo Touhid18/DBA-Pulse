@@ -21,6 +21,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.dbaservicesptyltd.dbaservices.adapter.NotifAdapter;
 import com.dbaservicesptyltd.dbaservices.model.NotifItem;
@@ -33,7 +34,6 @@ import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
 public class JobsInProgressActivity extends Activity {
 
 	private static Context tContext;
-	@SuppressWarnings("unused")
 	private static final String TAG = "JobsInProgressActivity";
 	private static ArrayList<NotifItem> jobsList;
 	private NotifAdapter jobsAdapter;
@@ -51,6 +51,10 @@ public class JobsInProgressActivity extends Activity {
 		setContentView(R.layout.jobs_progress);
 		tContext = JobsInProgressActivity.this;
 		formAdminObj();
+		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
+		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
+		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
+		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
@@ -73,6 +77,8 @@ public class JobsInProgressActivity extends Activity {
 		int pending = intent.getIntExtra(Constants.U_PENDING_COUNT, 0);
 		int resolved = intent.getIntExtra(Constants.U_RESOLVED_COUNT, 0);
 		boolean isOnline = intent.getBooleanExtra(Constants.U_IS_ONLINE, false);
+		Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active + ", " + pending + ", " + resolved
+				+ ", " + isOnline);
 		adminObj = new OnlineAdminRow(adminName, userId, active, pending, resolved, isOnline);
 	}
 
