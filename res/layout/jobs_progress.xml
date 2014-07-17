@@ -1,0 +1,124 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/BlackishGray"
+    tools:context="${relativePackage}.${activityClass}"
+    tools:ignore="HardcodedText" >
+
+    <ImageView
+        android:id="@+id/iv_top_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/dba_top_bar"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:id="@+id/ll_admin_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/iv_top_logo"
+        android:padding="5dp" >
+
+        <ImageView
+            android:id="@+id/iv_status"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_weight=".07"
+            android:maxHeight="24dp"
+            android:minHeight="16dp"
+            android:padding="2dp"
+            android:src="@drawable/status_offline"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/tv_admin_name"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_weight=".33"
+            android:maxHeight="24dp"
+            android:minHeight="16dp"
+            android:padding="2dp"
+            android:text="Sia Shamsai"
+            android:textColor="@color/gray"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tv_active_count"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_weight=".11"
+            android:maxHeight="24dp"
+            android:minHeight="16dp"
+            android:padding="2dp"
+            android:text="500"
+            android:textColor="@color/red"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tv_pending_count"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_weight=".11"
+            android:maxHeight="24dp"
+            android:minHeight="16dp"
+            android:padding="2dp"
+            android:text="500"
+            android:textColor="@color/yellow"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tv_resolved_count"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_weight=".11"
+            android:maxHeight="24dp"
+            android:minHeight="16dp"
+            android:padding="2dp"
+            android:text="500"
+            android:textColor="@color/green_brighter"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_msg_admin"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight=".33"
+            android:background="@drawable/btn_message"
+            android:gravity="center"
+            android:maxHeight="24dp"
+            android:minHeight="16dp"
+            android:padding="3dp"
+            android:text="Message"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lv_notifs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/ll_admin_holder"
+        android:dividerHeight="0dip" >
+    </ListView>
+
+    <ImageView
+        android:id="@+id/iv_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="10dp"
+        android:src="@drawable/ic_action_navigation_refresh"
+        tools:ignore="ContentDescription" />
+
+</RelativeLayout>
