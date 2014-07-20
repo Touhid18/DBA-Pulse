@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="20dp"
+    android:background="@drawable/dialog_bg"
+    android:orientation="vertical"
+    android:padding="12dp"
+    tools:ignore="HardcodedText" >
+
+    <TextView
+        android:id="@+id/tv_dialog_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:padding="3dp"
+        android:text="Medium Text"
+        android:textColor="@color/red"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_dialog_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:padding="3dp"
+        android:text="Medium Text"
+        android:textColor="@color/red"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal"
+        android:padding="3dp"
+        tools:ignore="ButtonStyle" >
+
+        <Button
+            android:id="@+id/btn_action"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@color/red"
+            android:minWidth="44dp"
+            android:padding="2dp"
+            android:text="ACTION"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btn_ignore"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@color/yellow"
+            android:minWidth="44dp"
+            android:padding="2dp"
+            android:text="IGNORE"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btn_resolved"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@color/green_brighter"
+            android:minWidth="46dp"
+            android:padding="2dp"
+            android:text="RESOLVED"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -137,7 +137,7 @@ public class OnlineAdminFragment extends Fragment {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
 						JSONArray adminArray = responseObj.getJSONArray("active_users");
-						adminList = OnlineAdminRow.parseNotifList(adminArray);
+						adminList = OnlineAdminRow.parseAdminList(adminArray);
 						Log.e("???????", "admin count = " + adminList.size());
 
 						onlineAdminAdapter.setData(adminList);
@@ -145,6 +145,7 @@ public class OnlineAdminFragment extends Fragment {
 						ivRefresh.clearAnimation();
 					} else {
 						alert("Invalid token!");
+						ivRefresh.clearAnimation();
 					}
 				} catch (JSONException e) {
 					alert("Exception.");

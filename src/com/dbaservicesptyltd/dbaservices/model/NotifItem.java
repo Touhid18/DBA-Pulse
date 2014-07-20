@@ -17,11 +17,11 @@ import com.google.gson.GsonBuilder;
  * 
  */
 public class NotifItem {
-	private String description, datetime, updated, clientName;
+	private String description, datetime, updated, clientName, name;
 	private int id, clientID, userID, status, severity;
 
 	public NotifItem(int id, int clientID, int userID, int status, int severity, String description, String datetime,
-			String updated, String clientName) {
+			String updated, String clientName, String userName) {
 		this.id = id;
 		this.clientID = clientID;
 		this.userID = userID;
@@ -31,6 +31,7 @@ public class NotifItem {
 		this.datetime = datetime;
 		this.updated = updated;
 		this.clientName = clientName;
+		this.name = userName;
 	}
 
 	public static ArrayList<NotifItem> parseNotifList(JSONArray notifArray) {
@@ -106,6 +107,21 @@ public class NotifItem {
 	 */
 	public String getClientName() {
 		return clientName;
+	}
+
+	/**
+	 * @param userName
+	 *            the name to set
+	 */
+	public void setUserName(String userName) {
+		this.name = userName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getUserName() {
+		return name;
 	}
 
 	/**

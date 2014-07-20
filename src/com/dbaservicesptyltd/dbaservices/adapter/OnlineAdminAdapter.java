@@ -9,7 +9,9 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,7 +25,7 @@ import com.dbaservicesptyltd.dbaservices.R;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 
 /**
- * @author Dell
+ * @author Touhid
  * 
  */
 public class OnlineAdminAdapter extends ArrayAdapter<OnlineAdminRow> {
@@ -64,7 +66,6 @@ public class OnlineAdminAdapter extends ArrayAdapter<OnlineAdminRow> {
 			holder = (ViewHolder) convertView.getTag();
 
 		OnlineAdminRow amdinItem = getItem(position);
-		// TODO
 		if (amdinItem.isOnline())
 			holder.ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(),
 					R.drawable.status_online));
@@ -76,6 +77,9 @@ public class OnlineAdminAdapter extends ArrayAdapter<OnlineAdminRow> {
 			@Override
 			public void onClick(View v) {
 				// TODO input message & send it
+				Intent sendIntent = new Intent(Intent.ACTION_VIEW);         
+				sendIntent.setData(Uri.parse("sms:"));
+				tContext.startActivity(sendIntent);
 			}
 		});
 

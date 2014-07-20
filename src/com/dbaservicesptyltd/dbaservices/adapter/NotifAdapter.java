@@ -20,7 +20,7 @@ import com.dbaservicesptyltd.dbaservices.model.NotifItem;
 import com.dbaservicesptyltd.dbaservices.utils.Constants;
 
 /**
- * @author Dell
+ * @author Touhid
  * 
  */
 public class NotifAdapter extends ArrayAdapter<NotifItem> {
@@ -54,8 +54,12 @@ public class NotifAdapter extends ArrayAdapter<NotifItem> {
 			holder = (ViewHolder) convertView.getTag();
 
 		NotifItem item = getItem(position);
-		holder.tvNotif.setText(item.getDatetime() + " " + item.getDescription() + ", " + item.getClientName() + ", "
-				+ item.getUpdated());
+		if (item.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED)
+			holder.tvNotif.setText(item.getDatetime() + " " + item.getDescription() + ", " + item.getClientName()
+					+ ", " + "Unassigned");
+		else
+			holder.tvNotif.setText(item.getDatetime() + " " + item.getDescription() + ", " + item.getClientName()
+					+ ", [" + item.getUserName() + ", " + item.getUpdated() + "].");
 		int severity = item.getSeverity();
 		if (severity == Constants.NOTIF_SEVERITY_ALERT) {
 			holder.tvNotif.setTextColor(tContext.getResources().getColor(R.color.red));

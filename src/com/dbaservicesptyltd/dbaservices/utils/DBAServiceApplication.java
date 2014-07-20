@@ -101,6 +101,12 @@ public class DBAServiceApplication {
 		String token = prefs.getString(Constants.ACCESS_TOKEN, "none");
 		return token;
 	}
+	
+	public static int getUserId(Context context){
+		if (prefs == null)
+			prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getInt(Constants.USER_ID, 0);
+	}
 
 	// public boolean isFirstTime() {
 	// Boolean firstTimeFlag = User.getBoolean(Constants.FIRST_TIME, true);

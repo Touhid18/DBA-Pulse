@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -19,16 +21,22 @@ import com.google.gson.GsonBuilder;
 public class OnlineAdminRow {
 
 	private String name;
-	private int user_id, active, pending, resolved;
-	private boolean isOnline;
+	private int user_id, actioned, ignored, resolved;
+	private boolean is_online;
 
 	public OnlineAdminRow(String adminName, int uId, int active, int pending, int resolved, boolean isOnLine) {
 		this.name = adminName;
 		this.user_id = uId;
-		this.active = active;
-		this.pending = pending;
+		this.actioned = active;
+		this.ignored = pending;
 		this.resolved = resolved;
-		this.isOnline = isOnLine;
+		this.is_online = isOnLine;
+	}
+
+	@Override
+	public String toString() {
+		return "Name: " + name + ", user_id=" + user_id + ", actioned=" + actioned + ", ignored=" + ignored
+				+ ", resolved=" + resolved + ", is_online:" + is_online;
 	}
 
 	/**
@@ -65,7 +73,7 @@ public class OnlineAdminRow {
 	 * @return the active
 	 */
 	public int getActive() {
-		return active;
+		return actioned;
 	}
 
 	/**
@@ -73,14 +81,14 @@ public class OnlineAdminRow {
 	 *            the active to set
 	 */
 	public void setActive(int active) {
-		this.active = active;
+		this.actioned = active;
 	}
 
 	/**
 	 * @return the pending
 	 */
 	public int getPending() {
-		return pending;
+		return ignored;
 	}
 
 	/**
@@ -88,7 +96,7 @@ public class OnlineAdminRow {
 	 *            the pending to set
 	 */
 	public void setPending(int pending) {
-		this.pending = pending;
+		this.ignored = pending;
 	}
 
 	/**
@@ -110,7 +118,7 @@ public class OnlineAdminRow {
 	 * @return the isOnline
 	 */
 	public boolean isOnline() {
-		return isOnline;
+		return is_online;
 	}
 
 	/**
@@ -118,7 +126,7 @@ public class OnlineAdminRow {
 	 *            the isOnline to set
 	 */
 	public void setOnline(boolean isOnline) {
-		this.isOnline = isOnline;
+		this.is_online = isOnline;
 	}
 
 	/**
@@ -126,7 +134,7 @@ public class OnlineAdminRow {
 	 *            as JSONArray
 	 * @return parsed adminList
 	 */
-	public static ArrayList<OnlineAdminRow> parseNotifList(JSONArray adminArray) {
+	public static ArrayList<OnlineAdminRow> parseAdminList(JSONArray adminArray) {
 		ArrayList<OnlineAdminRow> adminList = new ArrayList<OnlineAdminRow>();
 
 		GsonBuilder gsonb = new GsonBuilder();
@@ -138,8 +146,9 @@ public class OnlineAdminRow {
 				JSONObject thisAdmin = adminArray.getJSONObject(i);
 				if (thisAdmin != null) {
 					String jsonString = thisAdmin.toString();
-					OnlineAdminRow fav = gson.fromJson(jsonString, OnlineAdminRow.class);
-					adminList.add(fav);
+					OnlineAdminRow admin = gson.fromJson(jsonString, OnlineAdminRow.class);
+					Log.d("parseAdminList",admin.toString());
+					adminList.add(admin);
 				}
 			}
 		} catch (JSONException e) {

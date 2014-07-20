@@ -12,6 +12,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,10 +52,7 @@ public class JobsInProgressActivity extends Activity {
 		setContentView(R.layout.jobs_progress);
 		tContext = JobsInProgressActivity.this;
 		formAdminObj();
-		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
-		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
-		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
-		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
+		setAdminViews();
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
@@ -67,6 +65,16 @@ public class JobsInProgressActivity extends Activity {
 		lvNotifs.setAdapter(jobsAdapter);
 
 		new GetAdminJobs().execute();
+	}
+
+	private void setAdminViews() {
+		ImageView ivStatus = (ImageView) findViewById(R.id.iv_status);
+		if (adminObj.isOnline())
+			ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
+		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
+		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
+		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
+		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
 	}
 
 	private void formAdminObj() {
@@ -143,7 +151,7 @@ public class JobsInProgressActivity extends Activity {
 						alert("Invalid token!");
 					}
 				} catch (JSONException e) {
-					alert("Exception.");
+					alert("Malformed data received!");
 					e.printStackTrace();
 				}
 			}
@@ -157,7 +165,6 @@ public class JobsInProgressActivity extends Activity {
 		AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
 		bld.setMessage(message);
 		bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
