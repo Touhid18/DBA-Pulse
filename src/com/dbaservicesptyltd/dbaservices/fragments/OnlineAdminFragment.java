@@ -43,7 +43,7 @@ public class OnlineAdminFragment extends Fragment {
 	private OnlineAdminAdapter onlineAdminAdapter;
 
 	private ImageView ivRefresh;
-	private boolean isNewRefresh = false;
+	private boolean isNewRefresh = true;
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
@@ -88,6 +88,7 @@ public class OnlineAdminFragment extends Fragment {
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
+		isNewRefresh = true;
 		if(isVisibleToUser)
 			new GetOnlineAdmins().execute();
 	}
@@ -107,7 +108,7 @@ public class OnlineAdminFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				ivRefresh.startAnimation(rotation);
-				isNewRefresh = true;
+				isNewRefresh = false;
 				new GetOnlineAdmins().execute();
 			}
 		});
@@ -118,7 +119,7 @@ public class OnlineAdminFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if (!pDialog.isShowing() && !isNewRefresh) {
+			if (!pDialog.isShowing() && isNewRefresh) {
 				pDialog.setMessage("Refreshing admin list ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);

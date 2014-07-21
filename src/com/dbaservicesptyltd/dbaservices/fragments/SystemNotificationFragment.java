@@ -1,9 +1,11 @@
 package com.dbaservicesptyltd.dbaservices.fragments;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +55,7 @@ public class SystemNotificationFragment extends Fragment {
 
 	private ScheduledThreadPoolExecutor schThPoolExecutor;
 	private Set<Integer> scheduledNotifIdSet;
+	private HashMap<Integer, ScheduledFuture<?>> scheduledThreads;
 
 	private static Context tContext;
 	private static final String TAG = "SystemNotificationFragment";
@@ -97,6 +100,7 @@ public class SystemNotificationFragment extends Fragment {
 
 		// Set looper
 		scheduledNotifIdSet = new HashSet<Integer>();
+		scheduledThreads = new HashMap<>();
 		schThPoolExecutor = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(50);
 		setTwoMinuteNotifRefresher();
 
@@ -144,19 +148,34 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private void setRelooperForTheIgnoredNotif(final NotifItem notifItem) {
-		if (scheduledNotifIdSet.contains((Integer) notifItem.getId()))
+		final int notifId = notifItem.getId();
+		final String notifDesc = notifItem.getDescription();
+		if (scheduledNotifIdSet.contains((Integer) notifId))
 			return;
-		Log.d("setRelooperForTheIgnoredNotif",
-				"Scheduling for " + notifItem.getId() + ", " + notifItem.getDescription());
-		scheduledNotifIdSet.add((Integer) notifItem.getId());
-		schThPoolExecutor.scheduleAtFixedRate(new Runnable() {
+		if (scheduledThreads.containsKey(notifId))
+			return;
+		Log.d("setRelooperForTheIgnoredNotif", "Scheduling for " + notifId + ", " + notifDesc);
+		scheduledNotifIdSet.add((Integer) notifId);
+		ScheduledFuture<?> t = schThPoolExecutor.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				Log.d("setRelooperForTheIgnoredNotif",
-						"Dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+				Log.d("setRelooperForTheIgnoredNotif", "Dialog for " + notifId + ", " + notifDesc);
+				if (isIssueAssigned(notifId)) {
+					scheduledThreads.get(notifId).cancel(false);
+					return;
+				}
 				runTheDialog(notifItem);
 			}
 		}, 7, 7, TimeUnit.MINUTES); // TODO Minute
+		scheduledThreads.put(notifId, t);
+	}
+
+	private boolean isIssueAssigned(int notifId) {
+		for (NotifItem ni : notifList) {
+			if (ni.getId() == notifId && ni.getStatus() != Constants.NOTIF_TYPE_UNASSIGNED)
+				return true;
+		}
+		return false;
 	}
 
 	private void runTheDialog(final NotifItem notifItem) {
@@ -263,14 +282,19 @@ public class SystemNotificationFragment extends Fragment {
 		protected JSONObject doInBackground(Void... params) {
 			String url = Constants.URL_PARENT + "notifications";
 
-			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
-					DBAServiceApplication.getAppAccessToken(tContext));
-			if (response.getStatus() == 200) {
-				Log.d(">>>><<<<", "success in retrieving notifications.");
-				JSONObject responseObj = response.getjObj();
-				return responseObj;
-			} else
-				return null;
+			try {
+				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
+						DBAServiceApplication.getAppAccessToken(tContext));
+				if (response.getStatus() == 200) {
+					Log.d(">>>><<<<", "success in retrieving notifications.");
+					JSONObject responseObj = response.getjObj();
+					return responseObj;
+				} else
+					return null;
+			} catch (Exception e) {
+				Log.e("JSONParser", "Exception in retrieveServerData" + e.toString());
+			}
+			return null;
 		}
 
 		@Override
