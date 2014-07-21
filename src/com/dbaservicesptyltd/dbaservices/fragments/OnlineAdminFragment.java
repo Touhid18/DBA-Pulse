@@ -82,10 +82,21 @@ public class OnlineAdminFragment extends Fragment {
 			}
 		});
 
-		new GetOnlineAdmins().execute();
-
 		return rootView;
 	}
+	
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		if(isVisibleToUser)
+			new GetOnlineAdmins().execute();
+	}
+
+	// @Override
+	// public void onResume() {
+	// super.onResume();
+	// new GetOnlineAdmins().execute();
+	// }
 
 	private void setRefreshAction(ViewGroup rootView) {
 		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_admin);

@@ -1,6 +1,11 @@
 package com.dbaservicesptyltd.dbaservices.fragments;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +48,11 @@ import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
 
 public class SystemNotificationFragment extends Fragment {
 
-	private Handler updateHandler;
+	private Handler refresherHandler;
+	private Thread refresherThread;
+
+	private ScheduledThreadPoolExecutor schThPoolExecutor;
+	private Set<Integer> scheduledNotifIdSet;
 
 	private static Context tContext;
 	private static final String TAG = "SystemNotificationFragment";
@@ -51,7 +60,7 @@ public class SystemNotificationFragment extends Fragment {
 	private NotifAdapter notifAdapter;
 
 	private ImageView ivRefresh;
-	private boolean isNewRefresh = false;
+	private boolean isNewRefresh = true;
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
@@ -86,21 +95,39 @@ public class SystemNotificationFragment extends Fragment {
 			}
 		});
 
-		new GetNotifications().execute();
-		setNotifRefresher();
+		// Set looper
+		scheduledNotifIdSet = new HashSet<Integer>();
+		schThPoolExecutor = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(50);
+		setTwoMinuteNotifRefresher();
 
 		return rootView;
 	}
 
-	private void setNotifRefresher() {
-		updateHandler = new Handler();
-		new Thread(new Runnable() {
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		isNewRefresh = true;
+		if (isVisibleToUser)
+			new GetNotifications().execute();
+	}
+
+	private void setTwoMinuteNotifRefresher() {
+		refresherHandler = new Handler();
+		refresherThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
+					if (Thread.interrupted()) {
+						Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
+						break;
+					}
 					try {
 						Thread.sleep(2 * 60 * 1000);
-						updateHandler.post(new Runnable() {
+						if (Thread.interrupted()) {
+							Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
+							break;
+						}
+						refresherHandler.post(new Runnable() {
 							@Override
 							public void run() {
 								Log.d(":D", "2min refresher being run...");
@@ -112,56 +139,84 @@ public class SystemNotificationFragment extends Fragment {
 					}
 				}
 			}
-		}).start();
+		});
+		refresherThread.start();
 	}
 
 	private void setRelooperForTheIgnoredNotif(final NotifItem notifItem) {
-		
+		if (scheduledNotifIdSet.contains((Integer) notifItem.getId()))
+			return;
+		Log.d("setRelooperForTheIgnoredNotif",
+				"Scheduling for " + notifItem.getId() + ", " + notifItem.getDescription());
+		scheduledNotifIdSet.add((Integer) notifItem.getId());
+		schThPoolExecutor.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				Log.d("setRelooperForTheIgnoredNotif",
+						"Dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+				runTheDialog(notifItem);
+			}
+		}, 7, 7, TimeUnit.MINUTES); // TODO Minute
+	}
+
+	private void runTheDialog(final NotifItem notifItem) {
+		Log.d("runTheDialog", "Run dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Log.d("runOnUiThread", "The dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+				// Toast.makeText(tContext, "Notif Id:" + notifItem.getId(),
+				// Toast.LENGTH_SHORT).show();
+				showActionDialog(notifItem);
+			}
+		});
 	}
 
 	private void showActionDialog(final NotifItem notifItem) {
-		final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-		dialog.setContentView(R.layout.action_dialog);
-		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.cancel();
-				new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-			}
-		});
-		dialog.findViewById(R.id.btn_ignore).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.cancel();
-				// TODO execute looper
-				setRelooperForTheIgnoredNotif(notifItem);
-			}
-		});
-		dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.cancel();
-				new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
-				new GetNotifications().execute();
-			}
-		});
-		String head = "";
-		if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
-			head = "CRITICAL ALERT RECEIVED";
-		else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
-			head = "WARNING RECEIVED";
-		else
-			head = "Notification Received";
-		TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
-		tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
-		TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
-		tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
-				+ ", " + notifItem.getUpdated());
-		// Center-focus the dialog
-		Window window = dialog.getWindow();
-		window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		window.setGravity(Gravity.CENTER);
-		dialog.show();
+		try {
+			final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+			dialog.setContentView(R.layout.action_dialog);
+			dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.cancel();
+					new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
+				}
+			});
+			dialog.findViewById(R.id.btn_ignore).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.cancel();
+					setRelooperForTheIgnoredNotif(notifItem);
+				}
+			});
+			dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.cancel();
+					new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+					new GetNotifications().execute();
+				}
+			});
+			String head = "";
+			if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
+				head = "CRITICAL ALERT RECEIVED";
+			else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
+				head = "WARNING RECEIVED";
+			else
+				head = "Notification Received";
+			TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
+			tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
+			TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
+			tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", "
+					+ notifItem.getClientName() + ", " + notifItem.getUpdated());
+			// Center-focus the dialog
+			Window window = dialog.getWindow();
+			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			window.setGravity(Gravity.CENTER);
+			dialog.show();
+		} catch (Exception e) {
+		}
 	}
 
 	private void setRefreshAction(ViewGroup rootView) {
@@ -173,10 +228,19 @@ public class SystemNotificationFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				ivRefresh.startAnimation(rotation);
-				isNewRefresh = true;
+				isNewRefresh = false;
 				new GetNotifications().execute();
 			}
 		});
+	}
+
+	private void checkAndShowUnassignedalert() {
+		for (NotifItem ni : notifList) {
+			if (ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED && ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
+				showActionDialog(ni);
+				return;
+			}
+		}
 	}
 
 	private class GetNotifications extends AsyncTask<Void, Void, JSONObject> {
@@ -184,11 +248,14 @@ public class SystemNotificationFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if (!pDialog.isShowing() && !isNewRefresh) {
-				pDialog.setMessage("Refreshing noifictions...");
-				pDialog.setCancelable(false);
-				pDialog.setIndeterminate(true);
-				pDialog.show();
+			try {
+				if (!pDialog.isShowing() && isNewRefresh) {
+					pDialog.setMessage("Refreshing noifictions...");
+					pDialog.setCancelable(false);
+					pDialog.setIndeterminate(true);
+					pDialog.show();
+				}
+			} catch (Exception e) {
 			}
 		}
 
@@ -220,6 +287,7 @@ public class SystemNotificationFragment extends Fragment {
 						notifAdapter.setData(notifList);
 						notifAdapter.notifyDataSetChanged();
 						ivRefresh.clearAnimation();
+						checkAndShowUnassignedalert();
 					} else {
 						alert("Invalid token or malformed data received!");
 						ivRefresh.clearAnimation();
@@ -233,7 +301,6 @@ public class SystemNotificationFragment extends Fragment {
 			if (pDialog.isShowing())
 				pDialog.dismiss();
 		}
-
 	}
 
 	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
@@ -243,7 +310,7 @@ public class SystemNotificationFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if (!pDialog.isShowing() && !isNewRefresh) {
+			if (!pDialog.isShowing()) {
 				pDialog.setMessage("Deciding the issue ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
@@ -318,6 +385,36 @@ public class SystemNotificationFragment extends Fragment {
 		bld.create().show();
 	}
 
+	@Override
+	public void onStop() {
+		Log.i("onStop", "called");
+		super.onStop();
+	}
+
+	@Override
+	public void onDestroyView() {
+		Log.i("onDestroyView", "called");
+
+		if (refresherThread.isAlive())
+			refresherThread.interrupt();
+
+		scheduledNotifIdSet.clear();
+		scheduledNotifIdSet = null;
+		schThPoolExecutor.shutdown();
+		super.onDestroyView();
+	}
+
+	@Override
+	public void onDestroy() {
+		Log.i("onDestroy", "called");
+		super.onDestroy();
+	}
+
+	@Override
+	public void onDetach() {
+		Log.i("onDetach", "called");
+		super.onDetach();
+	}
 }
 
 /*

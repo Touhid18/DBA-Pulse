@@ -73,7 +73,7 @@ public class LogInActivity extends Activity {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			if (!pDialog.isShowing()) {
-				pDialog.setMessage("Searching...");
+				pDialog.setMessage("Logging in ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
 				pDialog.show();

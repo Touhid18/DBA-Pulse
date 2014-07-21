@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,11 +16,17 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -63,6 +70,12 @@ public class JobsInProgressActivity extends Activity {
 		jobsList = new ArrayList<NotifItem>();
 		jobsAdapter = new NotifAdapter(tContext, R.layout.notif_row, jobsList);
 		lvNotifs.setAdapter(jobsAdapter);
+		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				showActionDialog((NotifItem) parent.getItemAtPosition(position));
+			}
+		});
 
 		new GetAdminJobs().execute();
 	}
@@ -103,6 +116,43 @@ public class JobsInProgressActivity extends Activity {
 				new GetAdminJobs().execute();
 			}
 		});
+	}
+	private void showActionDialog(final NotifItem notifItem) {
+		final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+		dialog.setContentView(R.layout.action_dialog);
+		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.cancel();
+				new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
+			}
+		});
+		dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
+		dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.cancel();
+				new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+				new GetAdminJobs().execute();
+			}
+		});
+		String head = "";
+		if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
+			head = "CRITICAL ALERT RECEIVED";
+		else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
+			head = "WARNING RECEIVED";
+		else
+			head = "Notification Received";
+		TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
+		tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
+		TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
+		tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
+				+ ", " + notifItem.getUpdated());
+		// Center-focus the dialog
+		Window window = dialog.getWindow();
+		window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		window.setGravity(Gravity.CENTER);
+		dialog.show();
 	}
 
 	private class GetAdminJobs extends AsyncTask<Void, Void, JSONObject> {
@@ -159,6 +209,74 @@ public class JobsInProgressActivity extends Activity {
 			if (pDialog.isShowing())
 				pDialog.dismiss();
 		}
+	}
+	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
+
+		private int actionCode;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			if (!pDialog.isShowing() && !isNewRefresh) {
+				pDialog.setMessage("Deciding the issue ...");
+				pDialog.setCancelable(false);
+				pDialog.setIndeterminate(true);
+				pDialog.show();
+			}
+		}
+
+		@Override
+		protected JSONObject doInBackground(Integer... params) {
+			String url = Constants.URL_PARENT + "notifications";
+			actionCode = (int) params[0];
+			int notifId = (int) params[1];
+
+			JSONObject jObj = new JSONObject();
+			try {
+				jObj.put("id", notifId);
+				jObj.put("status", actionCode);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, url, null,
+					jObj.toString(), DBAServiceApplication.getAppAccessToken(tContext));
+			if (response.getStatus() == 200) {
+				Log.d(">>>><<<<", "success in retrieving notifications.");
+				JSONObject responseObj = response.getjObj();
+				return responseObj;
+			} else
+				return null;
+		}
+
+		@Override
+		protected void onPostExecute(JSONObject responseObj) {
+			super.onPostExecute(responseObj);
+			if (responseObj != null) {
+				try {
+					String status = responseObj.getString("status");
+					if (status.equals("OK")) {
+						if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
+							alert("Issue marked as actioned.");
+						else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
+							alert("Issue marked as resolved.");
+						else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
+							alert("Issue marked as ignored. This will again be prompted within 7 minutes");
+						ivRefresh.clearAnimation();
+					} else {
+						alert("Invalid token.");
+						ivRefresh.clearAnimation();
+					}
+				} catch (JSONException e) {
+					alert("Malformed data received!");
+					e.printStackTrace();
+				}
+			}
+
+			if (pDialog.isShowing())
+				pDialog.dismiss();
+		}
+
 	}
 
 	void alert(String message) {
