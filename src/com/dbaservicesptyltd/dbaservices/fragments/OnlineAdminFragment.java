@@ -10,7 +10,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,9 +25,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.dbaservicesptyltd.dbaservices.JobsInProgressActivity;
 import com.dbaservicesptyltd.dbaservices.R;
 import com.dbaservicesptyltd.dbaservices.adapter.OnlineAdminAdapter;
+import com.dbaservicesptyltd.dbaservices.interfaces.AdminClickListener;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
 import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
@@ -42,15 +41,23 @@ public class OnlineAdminFragment extends Fragment {
 	private static ArrayList<OnlineAdminRow> adminList;
 	private OnlineAdminAdapter onlineAdminAdapter;
 
+	private static AdminClickListener adminClickListener;
+
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	public static Fragment newInstance(Context context) {
+	// public static Fragment newInstance(Context context, AdminClickListener
+	// adminClickListener) {
+	// tContext = context;
+	// OnlineAdminFragment.adminClickListener = adminClickListener;
+	// return new OnlineAdminFragment();
+	// }
+	public OnlineAdminFragment(Context context, AdminClickListener adminClickListener) {
 		tContext = context;
-		return new OnlineAdminFragment();
+		OnlineAdminFragment.adminClickListener = adminClickListener;
 	}
 
 	@Override
@@ -71,25 +78,29 @@ public class OnlineAdminFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				OnlineAdminRow admin = (OnlineAdminRow) parent.getItemAtPosition(position);
-				Intent intent = new Intent(tContext, JobsInProgressActivity.class);
-				intent.putExtra(Constants.U_ID, admin.getUserId());
-				intent.putExtra(Constants.U_NAME, admin.getAdminName());
-				intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
-				intent.putExtra(Constants.U_PENDING_COUNT, admin.getPending());
-				intent.putExtra(Constants.U_RESOLVED_COUNT, admin.getResolved());
-				intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
-				startActivity(intent);
+				adminClickListener.handleClick(true, admin);
+				// Intent intent = new Intent(tContext,
+				// JobsInProgressActivity.class);
+				// intent.putExtra(Constants.U_ID, admin.getUserId());
+				// intent.putExtra(Constants.U_NAME, admin.getAdminName());
+				// intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
+				// intent.putExtra(Constants.U_PENDING_COUNT,
+				// admin.getPending());
+				// intent.putExtra(Constants.U_RESOLVED_COUNT,
+				// admin.getResolved());
+				// intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
+				// startActivity(intent);
 			}
 		});
 
 		return rootView;
 	}
-	
+
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
 		isNewRefresh = true;
-		if(isVisibleToUser)
+		if (isVisibleToUser)
 			new GetOnlineAdmins().execute();
 	}
 
@@ -119,7 +130,7 @@ public class OnlineAdminFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if (!pDialog.isShowing() && isNewRefresh) {
+			if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
 				pDialog.setMessage("Refreshing admin list ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
@@ -131,14 +142,19 @@ public class OnlineAdminFragment extends Fragment {
 		protected JSONObject doInBackground(Void... params) {
 			String url = Constants.URL_PARENT + "online_admin";
 
-			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
-					DBAServiceApplication.getAppAccessToken(tContext));
-			if (response.getStatus() == 200) {
-				Log.d(">>>><<<<", "success in retrieving admin list.");
-				JSONObject responseObj = response.getjObj();
-				return responseObj;
-			} else
-				return null;
+			try {
+				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
+						DBAServiceApplication.getAppAccessToken(tContext));
+				if (response.getStatus() == 200) {
+					Log.d(">>>><<<<", "success in retrieving admin list.");
+					JSONObject responseObj = response.getjObj();
+					return responseObj;
+				} else
+					return null;
+			} catch (Exception e) {
+				Log.e("JSONParser", "Exception in retrieveServerData" + e.toString());
+			}
+			return null;
 		}
 
 		@Override

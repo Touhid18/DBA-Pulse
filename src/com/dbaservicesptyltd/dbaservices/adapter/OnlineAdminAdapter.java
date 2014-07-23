@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,7 +31,6 @@ import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
  */
 public class OnlineAdminAdapter extends ArrayAdapter<OnlineAdminRow> {
 
-	@SuppressWarnings("unused")
 	private static final String TAG = OnlineAdminAdapter.class.getSimpleName();
 	private static Context tContext;
 
@@ -65,19 +65,21 @@ public class OnlineAdminAdapter extends ArrayAdapter<OnlineAdminRow> {
 		} else
 			holder = (ViewHolder) convertView.getTag();
 
-		OnlineAdminRow amdinItem = getItem(position);
-		if (amdinItem.isOnline())
+		OnlineAdminRow adminItem = getItem(position);
+		if (adminItem.isOnline()) {
 			holder.ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(),
 					R.drawable.status_online));
-		holder.tvAdminName.setText(amdinItem.getAdminName());
-		holder.tvActiveCount.setText(amdinItem.getActive() + "");
-		holder.tvPendingCount.setText(amdinItem.getPending() + "");
-		holder.tvResolvedCount.setText(amdinItem.getResolved() + "");
+			Log.d(TAG, "admin online: " + adminItem.getAdminName());
+		}
+		holder.tvAdminName.setText(adminItem.getAdminName());
+		holder.tvActiveCount.setText(adminItem.getActive() + "");
+		holder.tvPendingCount.setText(adminItem.getPending() + "");
+		holder.tvResolvedCount.setText(adminItem.getResolved() + "");
 		holder.btnMessage.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// TODO input message & send it
-				Intent sendIntent = new Intent(Intent.ACTION_VIEW);         
+				Intent sendIntent = new Intent(Intent.ACTION_VIEW);
 				sendIntent.setData(Uri.parse("sms:"));
 				tContext.startActivity(sendIntent);
 			}

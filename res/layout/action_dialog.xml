@@ -69,7 +69,7 @@
             android:layout_weight="1"
             android:background="@color/green_brighter"
             android:minWidth="46dp"
-            android:padding="2dp"
+            android:padding="1dp"
             android:text="RESOLVED"
             android:textSize="14sp" />
     </LinearLayout>

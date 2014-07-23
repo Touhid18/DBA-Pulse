@@ -1,4 +1,7 @@
-package com.dbaservicesptyltd.dbaservices;
+/**
+ * 
+ */
+package com.dbaservicesptyltd.dbaservices.fragments;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,21 +11,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.animation.Animation;
@@ -33,7 +37,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.dbaservicesptyltd.dbaservices.R;
 import com.dbaservicesptyltd.dbaservices.adapter.NotifAdapter;
+import com.dbaservicesptyltd.dbaservices.interfaces.AdminClickListener;
 import com.dbaservicesptyltd.dbaservices.model.NotifItem;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
@@ -41,7 +47,11 @@ import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
 import com.dbaservicesptyltd.dbaservices.utils.Constants;
 import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
 
-public class JobsInProgressActivity extends Activity {
+/**
+ * @author Touhid
+ * 
+ */
+public class JobsInProgressFragment extends Fragment {
 
 	private static Context tContext;
 	private static final String TAG = "JobsInProgressActivity";
@@ -49,25 +59,32 @@ public class JobsInProgressActivity extends Activity {
 	private NotifAdapter jobsAdapter;
 	private OnlineAdminRow adminObj;
 
+	private AdminClickListener adminClickListener;
+
 	private ImageView ivRefresh;
 	private boolean isNewRefresh;
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
+	public JobsInProgressFragment(Context context, OnlineAdminRow admin, AdminClickListener adminClicker) {
+		tContext = context;
+		adminObj = admin;
+		adminClickListener = adminClicker;
+	}
+
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.jobs_progress);
-		tContext = JobsInProgressActivity.this;
-		formAdminObj();
-		setAdminViews();
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		Log.d(TAG, "inside OncreateView()");
+		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.jobs_progress, container, false);
+		// formAdminObj();
+		setAdminViews(rootView);
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
 
-		setRefreshAction();
-		ListView lvNotifs = (ListView) findViewById(R.id.lv_jobs);
+		setRefreshAction(rootView);
+		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_jobs);
 
 		jobsList = new ArrayList<NotifItem>();
 		jobsAdapter = new NotifAdapter(tContext, R.layout.notif_row, jobsList);
@@ -78,35 +95,46 @@ public class JobsInProgressActivity extends Activity {
 				showActionDialog((NotifItem) parent.getItemAtPosition(position));
 			}
 		});
-
 		new GetAdminJobs().execute();
+		return rootView;
 	}
 
-	private void setAdminViews() {
-		ImageView ivStatus = (ImageView) findViewById(R.id.iv_status);
-		if (adminObj.isOnline())
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		// isNewRefresh = true;
+		// if (!isVisibleToUser)
+		// adminClickListener.handleClick(false, adminObj); //TODO remove this
+		// page by interface calling
+	}
+
+	private void setAdminViews(View rootView) {
+		ImageView ivStatus = (ImageView) rootView.findViewById(R.id.iv_status);
+		if (adminObj != null && adminObj.isOnline())
 			ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
-		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
-		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
-		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
-		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
+		((TextView) rootView.findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
+		((TextView) rootView.findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
+		((TextView) rootView.findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
+		((TextView) rootView.findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
 	}
 
-	private void formAdminObj() {
-		Intent intent = getIntent();
-		String adminName = intent.getStringExtra(Constants.U_NAME);
-		int userId = intent.getIntExtra(Constants.U_ID, 0);
-		int active = intent.getIntExtra(Constants.U_ACTIVE_COUNT, 0);
-		int pending = intent.getIntExtra(Constants.U_PENDING_COUNT, 0);
-		int resolved = intent.getIntExtra(Constants.U_RESOLVED_COUNT, 0);
-		boolean isOnline = intent.getBooleanExtra(Constants.U_IS_ONLINE, false);
-		Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active + ", " + pending + ", " + resolved
-				+ ", " + isOnline);
-		adminObj = new OnlineAdminRow(adminName, userId, active, pending, resolved, isOnline);
-	}
+	// private void formAdminObj() {
+	// Intent intent = getIntent();
+	// String adminName = intent.getStringExtra(Constants.U_NAME);
+	// int userId = intent.getIntExtra(Constants.U_ID, 0);
+	// int active = intent.getIntExtra(Constants.U_ACTIVE_COUNT, 0);
+	// int pending = intent.getIntExtra(Constants.U_PENDING_COUNT, 0);
+	// int resolved = intent.getIntExtra(Constants.U_RESOLVED_COUNT, 0);
+	// boolean isOnline = intent.getBooleanExtra(Constants.U_IS_ONLINE, false);
+	// Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active +
+	// ", " + pending + ", " + resolved
+	// + ", " + isOnline);
+	// adminObj = new OnlineAdminRow(adminName, userId, active, pending,
+	// resolved, isOnline);
+	// }
 
-	private void setRefreshAction() {
-		ivRefresh = (ImageView) findViewById(R.id.iv_refresh_jobs);
+	private void setRefreshAction(ViewGroup rootView) {
+		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_jobs);
 		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
 		rotation.setRepeatCount(Animation.INFINITE);
 		ivRefresh.startAnimation(rotation);
@@ -119,6 +147,7 @@ public class JobsInProgressActivity extends Activity {
 			}
 		});
 	}
+
 	private void showActionDialog(final NotifItem notifItem) {
 		final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 		dialog.setContentView(R.layout.action_dialog);
@@ -214,6 +243,7 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.dismiss();
 		}
 	}
+
 	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
 
 		private int actionCode;

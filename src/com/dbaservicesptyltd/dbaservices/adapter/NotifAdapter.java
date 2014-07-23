@@ -54,7 +54,7 @@ public class NotifAdapter extends ArrayAdapter<NotifItem> {
 			holder = (ViewHolder) convertView.getTag();
 
 		NotifItem item = getItem(position);
-		if (item.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED)
+		if (isNotifUnassigned(item))
 			holder.tvNotif.setText(item.getDatetime() + " " + item.getDescription() + ", " + item.getClientName()
 					+ ", " + "Unassigned");
 		else
@@ -75,6 +75,13 @@ public class NotifAdapter extends ArrayAdapter<NotifItem> {
 		}
 
 		return convertView;
+	}
+
+	private boolean isNotifUnassigned(NotifItem item) {
+		if (item.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED || item.getUpdated().equals("")
+				 || item.getUpdated().equals(null) || item.getUserName().equals("") || item.getUserName().equals(null))
+			return true;
+		return false;
 	}
 
 	public void setData(List<NotifItem> notifList) {

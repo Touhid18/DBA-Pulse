@@ -1,6 +1,8 @@
 package com.dbaservicesptyltd.dbaservices.fragments;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +23,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
@@ -64,6 +67,7 @@ public class SystemNotificationFragment extends Fragment {
 
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
+	private Dialog dialog;
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
@@ -135,11 +139,13 @@ public class SystemNotificationFragment extends Fragment {
 							@Override
 							public void run() {
 								Log.d(":D", "2min refresher being run...");
+								if (dialog.isShowing())
+									dialog.cancel();
 								new GetNotifications().execute();
 							}
 						});
 					} catch (Exception e) {
-						Log.d(":(", "exception");
+						Log.d(":(", "exception inside 2 min refresher ::\n" + e.getCause() + "\n" + e.getMessage());
 					}
 				}
 			}
@@ -193,7 +199,11 @@ public class SystemNotificationFragment extends Fragment {
 
 	private void showActionDialog(final NotifItem notifItem) {
 		try {
-			final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+			if (dialog != null && dialog.isShowing()) {
+				Log.i(TAG, "Cancelling previous dialog");
+				dialog.cancel();
+			}
+			dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 			dialog.setContentView(R.layout.action_dialog);
 			dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
 				@Override
@@ -234,7 +244,9 @@ public class SystemNotificationFragment extends Fragment {
 			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			window.setGravity(Gravity.CENTER);
 			dialog.show();
+			vibratePhone();
 		} catch (Exception e) {
+			Log.e(TAG, "Exception showing dialog :( \n::\n " + e.toString());
 		}
 	}
 
@@ -307,6 +319,7 @@ public class SystemNotificationFragment extends Fragment {
 						JSONArray notifArray = responseObj.getJSONArray("notifications");
 						notifList = NotifItem.parseNotifList(notifArray);
 						Log.e("???????", "notifications count = " + notifList.size());
+						sortNotifList();
 
 						notifAdapter.setData(notifList);
 						notifAdapter.notifyDataSetChanged();
@@ -325,6 +338,17 @@ public class SystemNotificationFragment extends Fragment {
 			if (pDialog.isShowing())
 				pDialog.dismiss();
 		}
+	}
+
+	private void sortNotifList() {
+		Collections.sort(notifList, new Comparator<NotifItem>() {
+			@Override
+			public int compare(NotifItem lhs, NotifItem rhs) {
+				int id1 = lhs.getId();
+				int id2 = rhs.getId();
+				return id1 < id2 ? 1 : id1 == id2 ? 0 : -1;
+			}
+		});
 	}
 
 	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
@@ -407,6 +431,18 @@ public class SystemNotificationFragment extends Fragment {
 			}
 		});
 		bld.create().show();
+	}
+
+	private void vibratePhone() {
+		// Set the pattern for vibration
+		// long pattern[] = { 0, 200, 100, 300, 400 };
+		// // Start the vibration
+		// Vibrator vibrator = (Vibrator)
+		// tContext.getSystemService(Context.VIBRATOR_SERVICE);
+		// // start vibration with repeated count, use -1 if you don't want to
+		// // repeat the vibration
+		// vibrator.vibrate(pattern, 0);
+		((Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(800);
 	}
 
 	@Override
