@@ -132,7 +132,7 @@ public class JobsInProgressActivity extends Activity {
 		final Dialog dialog = new Dialog(tContext,
 				android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 		dialog.setContentView(R.layout.action_dialog);
-<<<<<<< HEAD
+
 		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -141,18 +141,6 @@ public class JobsInProgressActivity extends Activity {
 				new GetAdminJobs().execute();
 			}
 		});
-=======
-		dialog.findViewById(R.id.btn_action).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						dialog.cancel();
-						new DecideNotification().execute(
-								Constants.NOTIF_TYPE_ACTIONED,
-								notifItem.getId());
-					}
-				});
->>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 		dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
 		dialog.findViewById(R.id.btn_resolved).setOnClickListener(
 				new OnClickListener() {

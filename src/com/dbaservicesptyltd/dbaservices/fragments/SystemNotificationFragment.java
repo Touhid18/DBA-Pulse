@@ -213,16 +213,11 @@ public class SystemNotificationFragment extends Fragment {
 
 	private void showActionDialog(final NotifItem notifItem) {
 		try {
-<<<<<<< HEAD
 			if (dialog != null && dialog.isShowing()) {
 				Log.i(TAG, "Cancelling previous dialog");
 				dialog.cancel();
 			}
 			dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-=======
-			final Dialog dialog = new Dialog(tContext,
-					android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
->>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 			dialog.setContentView(R.layout.action_dialog);
 			dialog.findViewById(R.id.btn_action).setOnClickListener(
 					new OnClickListener() {
@@ -354,13 +349,8 @@ public class SystemNotificationFragment extends Fragment {
 						JSONArray notifArray = responseObj
 								.getJSONArray("notifications");
 						notifList = NotifItem.parseNotifList(notifArray);
-<<<<<<< HEAD
 						Log.e("???????", "notifications count = " + notifList.size());
 						sortNotifList();
-=======
-						Log.e("???????",
-								"notifications count = " + notifList.size());
->>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 
 						notifAdapter.setData(notifList);
 						notifAdapter.notifyDataSetChanged();
@@ -381,7 +371,6 @@ public class SystemNotificationFragment extends Fragment {
 		}
 	}
 
-<<<<<<< HEAD
 	private void sortNotifList() {
 		Collections.sort(notifList, new Comparator<NotifItem>() {
 			@Override
@@ -394,10 +383,6 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
-=======
-	private class DecideNotification extends
-			AsyncTask<Integer, Void, JSONObject> {
->>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 
 		private int actionCode;
 
