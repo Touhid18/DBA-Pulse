@@ -78,9 +78,11 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
 		Log.d(TAG, "inside OncreateView()");
-		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.sys_notif, container, false);
+		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.sys_notif,
+				container, false);
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
@@ -93,19 +95,24 @@ public class SystemNotificationFragment extends Fragment {
 		lvNotifs.setAdapter(notifAdapter);
 		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				NotifItem notifItem = (NotifItem) parent.getItemAtPosition(position);
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				NotifItem notifItem = (NotifItem) parent
+						.getItemAtPosition(position);
 				if (notifItem.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED)
 					showActionDialog(notifItem);
 				else
-					Toast.makeText(tContext, "The job is already assigned!", Toast.LENGTH_SHORT).show();
+					Toast.makeText(tContext, "The job is already assigned!",
+							Toast.LENGTH_SHORT).show();
 			}
 		});
 
+		new GetNotifications().execute();
 		// Set looper
 		scheduledNotifIdSet = new HashSet<Integer>();
 		scheduledThreads = new HashMap<>();
-		schThPoolExecutor = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(50);
+		schThPoolExecutor = (ScheduledThreadPoolExecutor) Executors
+				.newScheduledThreadPool(50);
 		setTwoMinuteNotifRefresher();
 
 		return rootView;
@@ -126,13 +133,15 @@ public class SystemNotificationFragment extends Fragment {
 			public void run() {
 				while (true) {
 					if (Thread.interrupted()) {
-						Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
+						Log.i("-_-",
+								"2min refresher thread interrupted, so exiting the loop.");
 						break;
 					}
 					try {
 						Thread.sleep(2 * 60 * 1000);
 						if (Thread.interrupted()) {
-							Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
+							Log.i("-_-",
+									"2min refresher thread interrupted, so exiting the loop.");
 							break;
 						}
 						refresherHandler.post(new Runnable() {
@@ -156,40 +165,45 @@ public class SystemNotificationFragment extends Fragment {
 	private void setRelooperForTheIgnoredNotif(final NotifItem notifItem) {
 		final int notifId = notifItem.getId();
 		final String notifDesc = notifItem.getDescription();
-		if (scheduledNotifIdSet.contains((Integer) notifId))
+		if (scheduledNotifIdSet.contains((Integer) notifId)
+				|| scheduledThreads.containsKey(notifId))
 			return;
-		if (scheduledThreads.containsKey(notifId))
-			return;
-		Log.d("setRelooperForTheIgnoredNotif", "Scheduling for " + notifId + ", " + notifDesc);
+		Log.d("setRelooperForTheIgnoredNotif", "Scheduling for " + notifId
+				+ ", " + notifDesc);
 		scheduledNotifIdSet.add((Integer) notifId);
-		ScheduledFuture<?> t = schThPoolExecutor.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				Log.d("setRelooperForTheIgnoredNotif", "Dialog for " + notifId + ", " + notifDesc);
-				if (isIssueAssigned(notifId)) {
-					scheduledThreads.get(notifId).cancel(false);
-					return;
-				}
-				runTheDialog(notifItem);
-			}
-		}, 7, 7, TimeUnit.MINUTES); // TODO Minute
+		ScheduledFuture<?> t = schThPoolExecutor.scheduleAtFixedRate(
+				new Runnable() {
+					@Override
+					public void run() {
+						Log.d("setRelooperForTheIgnoredNotif", "Dialog for "
+								+ notifId + ", " + notifDesc);
+						if (isIssueAssigned(notifId)) {
+							scheduledThreads.get(notifId).cancel(false);
+							return;
+						}
+						runTheDialog(notifItem);
+					}
+				}, 7, 7, TimeUnit.MINUTES);
 		scheduledThreads.put(notifId, t);
 	}
 
 	private boolean isIssueAssigned(int notifId) {
 		for (NotifItem ni : notifList) {
-			if (ni.getId() == notifId && ni.getStatus() != Constants.NOTIF_TYPE_UNASSIGNED)
+			if (ni.getId() == notifId
+					&& ni.getStatus() != Constants.NOTIF_TYPE_UNASSIGNED)
 				return true;
 		}
 		return false;
 	}
 
 	private void runTheDialog(final NotifItem notifItem) {
-		Log.d("runTheDialog", "Run dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+		Log.d("runTheDialog", "Run dialog for " + notifItem.getId() + ", "
+				+ notifItem.getDescription());
 		getActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Log.d("runOnUiThread", "The dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+				Log.d("runOnUiThread", "The dialog for " + notifItem.getId()
+						+ ", " + notifItem.getDescription());
 				// Toast.makeText(tContext, "Notif Id:" + notifItem.getId(),
 				// Toast.LENGTH_SHORT).show();
 				showActionDialog(notifItem);
@@ -199,34 +213,47 @@ public class SystemNotificationFragment extends Fragment {
 
 	private void showActionDialog(final NotifItem notifItem) {
 		try {
+<<<<<<< HEAD
 			if (dialog != null && dialog.isShowing()) {
 				Log.i(TAG, "Cancelling previous dialog");
 				dialog.cancel();
 			}
 			dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+=======
+			final Dialog dialog = new Dialog(tContext,
+					android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+>>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 			dialog.setContentView(R.layout.action_dialog);
-			dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					dialog.cancel();
-					new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-				}
-			});
-			dialog.findViewById(R.id.btn_ignore).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					dialog.cancel();
-					setRelooperForTheIgnoredNotif(notifItem);
-				}
-			});
-			dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					dialog.cancel();
-					new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
-					new GetNotifications().execute();
-				}
-			});
+			dialog.findViewById(R.id.btn_action).setOnClickListener(
+					new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							dialog.cancel();
+							new DecideNotification().execute(
+									Constants.NOTIF_TYPE_ACTIONED,
+									notifItem.getId());
+							new GetNotifications().execute();
+						}
+					});
+			dialog.findViewById(R.id.btn_ignore).setOnClickListener(
+					new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							dialog.cancel();
+							setRelooperForTheIgnoredNotif(notifItem);
+						}
+					});
+			dialog.findViewById(R.id.btn_resolved).setOnClickListener(
+					new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							dialog.cancel();
+							new DecideNotification().execute(
+									Constants.NOTIF_TYPE_RESOLVED,
+									notifItem.getId());
+							new GetNotifications().execute();
+						}
+					});
 			String head = "";
 			if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
 				head = "CRITICAL ALERT RECEIVED";
@@ -234,14 +261,18 @@ public class SystemNotificationFragment extends Fragment {
 				head = "WARNING RECEIVED";
 			else
 				head = "Notification Received";
-			TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
+			TextView tvHead = (TextView) dialog
+					.findViewById(R.id.tv_dialog_head);
 			tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
-			TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
-			tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", "
+			TextView tvBody = (TextView) dialog
+					.findViewById(R.id.tv_dialog_body);
+			tvBody.setText(notifItem.getDatetime() + " "
+					+ notifItem.getDescription() + ", "
 					+ notifItem.getClientName() + ", " + notifItem.getUpdated());
 			// Center-focus the dialog
 			Window window = dialog.getWindow();
-			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			window.setLayout(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
 			window.setGravity(Gravity.CENTER);
 			dialog.show();
 			vibratePhone();
@@ -252,7 +283,8 @@ public class SystemNotificationFragment extends Fragment {
 
 	private void setRefreshAction(ViewGroup rootView) {
 		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+		final Animation rotation = AnimationUtils.loadAnimation(tContext,
+				R.anim.rotate_refresh);
 		rotation.setRepeatCount(Animation.INFINITE);
 		ivRefresh.startAnimation(rotation);
 		ivRefresh.setOnClickListener(new OnClickListener() {
@@ -267,7 +299,8 @@ public class SystemNotificationFragment extends Fragment {
 
 	private void checkAndShowUnassignedalert() {
 		for (NotifItem ni : notifList) {
-			if (ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED && ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
+			if (ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
+					&& ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
 				showActionDialog(ni);
 				return;
 			}
@@ -295,7 +328,8 @@ public class SystemNotificationFragment extends Fragment {
 			String url = Constants.URL_PARENT + "notifications";
 
 			try {
-				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
+				ServerResponse response = jsonParser.retrieveServerData(
+						Constants.REQUEST_TYPE_GET, url, null, null,
 						DBAServiceApplication.getAppAccessToken(tContext));
 				if (response.getStatus() == 200) {
 					Log.d(">>>><<<<", "success in retrieving notifications.");
@@ -304,7 +338,8 @@ public class SystemNotificationFragment extends Fragment {
 				} else
 					return null;
 			} catch (Exception e) {
-				Log.e("JSONParser", "Exception in retrieveServerData" + e.toString());
+				Log.e("JSONParser",
+						"Exception in retrieveServerData" + e.toString());
 			}
 			return null;
 		}
@@ -316,10 +351,16 @@ public class SystemNotificationFragment extends Fragment {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						JSONArray notifArray = responseObj.getJSONArray("notifications");
+						JSONArray notifArray = responseObj
+								.getJSONArray("notifications");
 						notifList = NotifItem.parseNotifList(notifArray);
+<<<<<<< HEAD
 						Log.e("???????", "notifications count = " + notifList.size());
 						sortNotifList();
+=======
+						Log.e("???????",
+								"notifications count = " + notifList.size());
+>>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 
 						notifAdapter.setData(notifList);
 						notifAdapter.notifyDataSetChanged();
@@ -340,6 +381,7 @@ public class SystemNotificationFragment extends Fragment {
 		}
 	}
 
+<<<<<<< HEAD
 	private void sortNotifList() {
 		Collections.sort(notifList, new Comparator<NotifItem>() {
 			@Override
@@ -352,6 +394,10 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
+=======
+	private class DecideNotification extends
+			AsyncTask<Integer, Void, JSONObject> {
+>>>>>>> caf3b8594d67c55ad02ac0ec7265417e7aef6e93
 
 		private int actionCode;
 
@@ -380,8 +426,9 @@ public class SystemNotificationFragment extends Fragment {
 				e.printStackTrace();
 			}
 
-			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, url, null,
-					jObj.toString(), DBAServiceApplication.getAppAccessToken(tContext));
+			ServerResponse response = jsonParser.retrieveServerData(
+					Constants.REQUEST_TYPE_POST, url, null, jObj.toString(),
+					DBAServiceApplication.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "success in retrieving notifications.");
 				JSONObject responseObj = response.getjObj();
