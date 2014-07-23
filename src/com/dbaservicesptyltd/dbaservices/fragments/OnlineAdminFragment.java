@@ -130,12 +130,12 @@ public class OnlineAdminFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
-				pDialog.setMessage("Refreshing admin list ...");
-				pDialog.setCancelable(false);
-				pDialog.setIndeterminate(true);
-				pDialog.show();
-			}
+			// if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
+			// pDialog.setMessage("Refreshing admin list ...");
+			// pDialog.setCancelable(false);
+			// pDialog.setIndeterminate(true);
+			// pDialog.show();
+			// }
 		}
 
 		@Override

@@ -96,12 +96,13 @@ public class JobsInProgressFragment extends Fragment {
 			}
 		});
 		new GetAdminJobs().execute();
+		getTag();
 		return rootView;
 	}
 
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
-		super.setUserVisibleHint(isVisibleToUser);
+		// super.setUserVisibleHint(isVisibleToUser);
 		// isNewRefresh = true;
 		// if (!isVisibleToUser)
 		// adminClickListener.handleClick(false, adminObj); //TODO remove this
@@ -196,7 +197,7 @@ public class JobsInProgressFragment extends Fragment {
 				pDialog.setMessage("Refreshing job list ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
-				pDialog.show();
+				// pDialog.show();
 			}
 		}
 

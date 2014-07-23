@@ -72,9 +72,8 @@ public class SystemNotificationFragment extends Fragment {
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	public static Fragment newInstance(Context context) {
-		tContext = context;
-		return new SystemNotificationFragment();
+	public SystemNotificationFragment(Context context){
+		tContext = context;		
 	}
 
 	@Override
@@ -84,6 +83,7 @@ public class SystemNotificationFragment extends Fragment {
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
+		dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 
 		setRefreshAction(rootView);
 		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_notifs);
@@ -202,7 +202,6 @@ public class SystemNotificationFragment extends Fragment {
 				Log.i(TAG, "Cancelling previous dialog");
 				dialog.cancel();
 			}
-			dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 			dialog.setContentView(R.layout.action_dialog);
 			dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
 				@Override
@@ -280,7 +279,7 @@ public class SystemNotificationFragment extends Fragment {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			try {
-				if (!pDialog.isShowing() && isNewRefresh) {
+				if (pDialog!=null && !pDialog.isShowing() && isNewRefresh) {
 					pDialog.setMessage("Refreshing noifictions...");
 					pDialog.setCancelable(false);
 					pDialog.setIndeterminate(true);
@@ -442,7 +441,7 @@ public class SystemNotificationFragment extends Fragment {
 		// // start vibration with repeated count, use -1 if you don't want to
 		// // repeat the vibration
 		// vibrator.vibrate(pattern, 0);
-		((Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(800);
+		((Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
 	}
 
 	@Override
