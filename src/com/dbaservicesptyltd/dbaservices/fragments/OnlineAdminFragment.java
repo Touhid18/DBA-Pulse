@@ -171,6 +171,8 @@ public class OnlineAdminFragment extends Fragment {
 						onlineAdminAdapter.setData(adminList);
 						onlineAdminAdapter.notifyDataSetChanged();
 						ivRefresh.clearAnimation();
+						//if (pDialog.isShowing())
+							pDialog.dismiss();
 					} else {
 						alert("Invalid token!");
 						ivRefresh.clearAnimation();

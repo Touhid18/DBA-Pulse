@@ -35,10 +35,9 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 		Log.d("MainActivity",
 				"handleClick :: admin name = " + admin.getAdminName() + "\nCurrent page number: "
 						+ pager.getCurrentItem());
-		vpAdapter.setPageCount(3);
 		vpAdapter.setAdminObject(admin);
-		vpAdapter.notifyDataSetChanged();
-		pager.setCurrentItem(3);
+		vpAdapter.setPageCount(3);
+		pager.setCurrentItem(2);
 
 		Log.i("MainActivity", "" + pager.getCurrentItem());
 	}

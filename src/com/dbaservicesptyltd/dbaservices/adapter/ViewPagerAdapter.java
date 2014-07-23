@@ -3,7 +3,7 @@ package com.dbaservicesptyltd.dbaservices.adapter;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
 
 import com.dbaservicesptyltd.dbaservices.fragments.JobsInProgressFragment;
@@ -12,7 +12,7 @@ import com.dbaservicesptyltd.dbaservices.fragments.SystemNotificationFragment;
 import com.dbaservicesptyltd.dbaservices.interfaces.AdminClickListener;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 
-public class ViewPagerAdapter extends FragmentStatePagerAdapter {// implements
+public class ViewPagerAdapter extends FragmentPagerAdapter {// implements
 																	// OnPageChangeListener
 																	// {
 
@@ -61,6 +61,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {// implements
 
 	public void setPageCount(int nPage) {
 		NUM_PAGES = nPage;
+		notifyDataSetChanged();
 	}
 
 	public void setAdminObject(OnlineAdminRow admin) {
