@@ -1,19 +1,25 @@
 package com.dbaservicesptyltd.dbaservices;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 
-import com.dbaservicesptyltd.dbaservices.adapter.ViewPagerAdapter;
+import com.dbaservicesptyltd.dbaservices.adapter.DynamicViewPagerAdapter;
+import com.dbaservicesptyltd.dbaservices.fragments.JobsInProgressFragment;
+import com.dbaservicesptyltd.dbaservices.fragments.OnlineAdminFragment;
+import com.dbaservicesptyltd.dbaservices.fragments.SystemNotificationFragment;
 import com.dbaservicesptyltd.dbaservices.interfaces.AdminClickListener;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 
-public class MainActivity extends FragmentActivity implements AdminClickListener,OnPageChangeListener {
+public class MainActivity extends FragmentActivity implements AdminClickListener, OnPageChangeListener {
 
 	private ViewPager pager;
-	private ViewPagerAdapter vpAdapter;
+	private DynamicViewPagerAdapter vpAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +27,12 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 		setContentView(R.layout.activity_main);
 
 		pager = (ViewPager) findViewById(R.id.pager);
-		vpAdapter = new ViewPagerAdapter(MainActivity.this, getSupportFragmentManager(), this);
+		//vpAdapter = new ViewPagerAdapter(MainActivity.this, getSupportFragmentManager(), this);
+		ArrayList<Fragment> fragList = new ArrayList<>();
+		fragList.add(new SystemNotificationFragment(MainActivity.this));
+		fragList.add(new OnlineAdminFragment(MainActivity.this, this));
+		
+		vpAdapter = new DynamicViewPagerAdapter(MainActivity.this, getSupportFragmentManager(), fragList);
 		pager.setAdapter(vpAdapter);
 		pager.setOnPageChangeListener(this);
 
@@ -38,8 +49,9 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 		Log.d("MainActivity",
 				"handleClick :: admin name = " + admin.getAdminName() + "\nCurrent page number: "
 						+ pager.getCurrentItem());
-		vpAdapter.setAdminObject(admin);
-		vpAdapter.addJobPage(pager, admin);
+		// vpAdapter.setAdminObject(admin);
+		// vpAdapter.addJobPage(pager, admin);
+		vpAdapter.addJobsPage(new JobsInProgressFragment(MainActivity.this, admin, this));
 		pager.setCurrentItem(2);
 
 		Log.i("MainActivity", "" + pager.getCurrentItem());
@@ -65,7 +77,7 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 
 	@Override
 	public void onPageSelected(int position) {
-		if(position==1 && vpAdapter.getCount()==3)
-			vpAdapter.removeJobsPage(pager);
+		if(position==1 && vpAdapter.getCount()==3);
+//			vpAdapter.removeJobsPage(pager);
 	}
 }
