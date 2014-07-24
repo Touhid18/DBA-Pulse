@@ -232,8 +232,11 @@ public class SystemNotificationFragment extends Fragment {
 				.setContentText(
 						notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
 								+ ", " + "Unassigned");
+		mBuilder.setAutoCancel(true);
+		// mBuilder.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 		Intent resultIntent = new Intent(tContext, MainActivity.class);
 		resultIntent.putExtra("stop_vibrator", true);
+		resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(tContext);
 		stackBuilder.addParentStack(MainActivity.class);
@@ -350,7 +353,7 @@ public class SystemNotificationFragment extends Fragment {
 			super.onPreExecute();
 			isAsyncTaskRunning = true;
 			try {
-				if(vibrator!=null)
+				if (vibrator != null)
 					vibrator.cancel();
 				if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
 					pDialog.setMessage("Refreshing noifictions...");
@@ -432,7 +435,7 @@ public class SystemNotificationFragment extends Fragment {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			isAsyncTaskRunning = true;
-			if(vibrator!=null)
+			if (vibrator != null)
 				vibrator.cancel();
 			if (!pDialog.isShowing()) {
 				pDialog.setMessage("Deciding the issue ...");
@@ -514,9 +517,10 @@ public class SystemNotificationFragment extends Fragment {
 		// Start the vibration
 		// start vibration with repeated count, use -1 if you don't want to
 		// repeat the vibration
-		if (vibrator != null)
+		if (vibrator != null) {
+			vibrator.cancel();
 			vibrator.vibrate(pattern, 0);
-		else if (tContext != null) {
+		} else if (tContext != null) {
 			vibrator = (Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE);
 			long pattern2[] = { 0, 600, 50, 800, 5 * 1000 };
 			vibrator.vibrate(pattern2, 0);
