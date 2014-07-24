@@ -308,10 +308,12 @@ public class SystemNotificationFragment extends Fragment {
 			Window window = dialog.getWindow();
 			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			window.setGravity(Gravity.CENTER);
-			vibratePhone();
 			dialog.show();
+			vibratePhone();
 		} catch (Exception e) {
 			Log.e(TAG, "Exception showing dialog :( \n::\n " + e.toString());
+			if (vibrator != null)
+				vibrator.cancel();
 		}
 		dialog.setOnCancelListener(new OnCancelListener() {
 			@Override
