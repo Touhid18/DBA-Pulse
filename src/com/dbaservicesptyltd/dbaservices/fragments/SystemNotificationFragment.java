@@ -68,6 +68,7 @@ public class SystemNotificationFragment extends Fragment {
 
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
+	private boolean isAsyncTaskRunning = false;
 	private Dialog dialog;
 	private Vibrator vibrator;
 	// Set the pattern for vibration
@@ -120,9 +121,10 @@ public class SystemNotificationFragment extends Fragment {
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
-		isNewRefresh = true;
-		if (isVisibleToUser)
+		if (isVisibleToUser && !isAsyncTaskRunning) {
+			isNewRefresh = true;
 			new GetNotifications().execute();
+		}
 	}
 
 	private void setTwoMinuteNotifRefresher() {
@@ -147,7 +149,8 @@ public class SystemNotificationFragment extends Fragment {
 								Log.d(":D", "2min refresher being run...");
 								if (dialog.isShowing())
 									dialog.cancel();
-								new GetNotifications().execute();
+								if (!isAsyncTaskRunning)
+									new GetNotifications().execute();
 							}
 						});
 					} catch (Exception e) {
@@ -213,8 +216,10 @@ public class SystemNotificationFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					dialog.cancel();
-					new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-					new GetNotifications().execute();
+					if (!isAsyncTaskRunning) {
+						new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
+						new GetNotifications().execute();
+					}
 				}
 			});
 			dialog.findViewById(R.id.btn_ignore).setOnClickListener(new OnClickListener() {
@@ -228,8 +233,10 @@ public class SystemNotificationFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					dialog.cancel();
-					new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
-					new GetNotifications().execute();
+					if (!isAsyncTaskRunning) {
+						new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+						new GetNotifications().execute();
+					}
 				}
 			});
 			String head = "";
@@ -256,7 +263,8 @@ public class SystemNotificationFragment extends Fragment {
 		dialog.setOnCancelListener(new OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				vibrator.cancel();
+				if (vibrator != null)
+					vibrator.cancel();
 			}
 		});
 	}
@@ -270,8 +278,10 @@ public class SystemNotificationFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				ivRefresh.startAnimation(rotation);
-				isNewRefresh = false;
-				new GetNotifications().execute();
+				if (!isAsyncTaskRunning) {
+					isNewRefresh = false;
+					new GetNotifications().execute();
+				}
 			}
 		});
 	}
@@ -290,6 +300,7 @@ public class SystemNotificationFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
+			isAsyncTaskRunning = true;
 			try {
 				if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
 					pDialog.setMessage("Refreshing noifictions...");
@@ -348,6 +359,7 @@ public class SystemNotificationFragment extends Fragment {
 
 			if (pDialog.isShowing())
 				pDialog.dismiss();
+			isAsyncTaskRunning = false;
 		}
 	}
 
@@ -369,6 +381,7 @@ public class SystemNotificationFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
+			isAsyncTaskRunning = true;
 			if (!pDialog.isShowing()) {
 				pDialog.setMessage("Deciding the issue ...");
 				pDialog.setCancelable(false);
@@ -427,6 +440,7 @@ public class SystemNotificationFragment extends Fragment {
 
 			if (pDialog.isShowing())
 				pDialog.dismiss();
+			isAsyncTaskRunning = false;
 		}
 
 	}
@@ -448,7 +462,8 @@ public class SystemNotificationFragment extends Fragment {
 		// Start the vibration
 		// start vibration with repeated count, use -1 if you don't want to
 		// repeat the vibration
-		vibrator.vibrate(pattern, 0);
+		if (vibrator != null)
+			vibrator.vibrate(pattern, 0);
 		// ((Vibrator)
 		// tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
 	}
@@ -469,6 +484,7 @@ public class SystemNotificationFragment extends Fragment {
 		scheduledNotifIdSet.clear();
 		scheduledNotifIdSet = null;
 		schThPoolExecutor.shutdown();
+		vibrator = null;
 		super.onDestroyView();
 	}
 
