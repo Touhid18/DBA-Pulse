@@ -75,9 +75,12 @@ public class SystemNotificationFragment extends Fragment {
 	private static ArrayList<NotifItem> notifList;
 	private NotifAdapter notifAdapter;
 
+	private int refreshCounter = 0;
+
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
 	private boolean isAsyncTaskRunning = false;
+	private boolean isFromRefresh = false;
 	private Dialog dialog;
 	private static Vibrator vibrator;
 	// Set the pattern for vibration
@@ -98,7 +101,7 @@ public class SystemNotificationFragment extends Fragment {
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
 		dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-		if (vibrator != null){
+		if (vibrator != null) {
 			vibrator.cancel();
 			vibrator = null;
 		}
@@ -114,9 +117,10 @@ public class SystemNotificationFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				NotifItem notifItem = (NotifItem) parent.getItemAtPosition(position);
-				if (notifItem.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED)
+				if (notifItem.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED) {
+					isFromRefresh = false;
 					showActionDialog(notifItem);
-				else
+				} else
 					Toast.makeText(tContext, "The job is already assigned!", Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -213,6 +217,7 @@ public class SystemNotificationFragment extends Fragment {
 				Log.d("runOnUiThread", "The dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
 				// Toast.makeText(tContext, "Notif Id:" + notifItem.getId(),
 				// Toast.LENGTH_SHORT).show();
+				isFromRefresh = true;
 				showActionDialog(notifItem);
 			}
 		});
@@ -309,7 +314,8 @@ public class SystemNotificationFragment extends Fragment {
 			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			window.setGravity(Gravity.CENTER);
 			dialog.show();
-			vibratePhone();
+			if (isFromRefresh)
+				vibratePhone();
 		} catch (Exception e) {
 			Log.e(TAG, "Exception showing dialog :( \n::\n " + e.toString());
 			if (vibrator != null)
@@ -344,6 +350,7 @@ public class SystemNotificationFragment extends Fragment {
 	private void checkAndShowUnassignedalert() {
 		for (NotifItem ni : notifList) {
 			if (ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED && ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
+				isFromRefresh = true;
 				showActionDialog(ni);
 				return;
 			}
@@ -371,7 +378,8 @@ public class SystemNotificationFragment extends Fragment {
 
 		@Override
 		protected JSONObject doInBackground(Void... params) {
-			String url = Constants.URL_PARENT + "notifications";
+			// String url = Constants.URL_PARENT + "notifications";
+			String url = Constants.URL_PARENT + "notifications/" + refreshCounter;
 
 			try {
 				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
@@ -412,7 +420,7 @@ public class SystemNotificationFragment extends Fragment {
 					alert("Malformed data received!");
 					e.printStackTrace();
 				}
-			}else{
+			} else {
 				if (pDialog.isShowing())
 					pDialog.dismiss();
 				new GetNotifications().execute();
@@ -529,7 +537,7 @@ public class SystemNotificationFragment extends Fragment {
 		if (vibrator != null) {
 			vibrator.cancel();
 			vibrator.vibrate(pattern, 0);
-		} 
+		}
 		// else if (tContext != null) {
 		// vibrator = (Vibrator)
 		// tContext.getSystemService(Context.VIBRATOR_SERVICE);
@@ -541,10 +549,17 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	@Override
+	public void onPause() {
+		refreshCounter = 0;
+		super.onPause();
+	}
+
+	@Override
 	public void onResume() {
-		super.onResume();
+		refreshCounter = 0;
 		Log.i(TAG, "onResume: cancelling vibrator ...");
 		vibrator.cancel();
+		super.onResume();
 	}
 
 	@Override
