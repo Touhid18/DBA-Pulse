@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -68,12 +69,15 @@ public class SystemNotificationFragment extends Fragment {
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
 	private Dialog dialog;
+	private Vibrator vibrator;
+	// Set the pattern for vibration
+	private long pattern[] = { 0, 5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000 };
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	public SystemNotificationFragment(Context context){
-		tContext = context;		
+	public SystemNotificationFragment(Context context) {
+		tContext = context;
 	}
 
 	@Override
@@ -84,6 +88,7 @@ public class SystemNotificationFragment extends Fragment {
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
 		dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+		vibrator = (Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE);
 
 		setRefreshAction(rootView);
 		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_notifs);
@@ -146,7 +151,8 @@ public class SystemNotificationFragment extends Fragment {
 							}
 						});
 					} catch (Exception e) {
-						Log.d(":(", "exception inside 2 min refresher ::\n" + e.getCause() + "\n" + e.getMessage());
+						Log.d(":(", "exception inside 2 min refresher ::\n" + e.getCause() + "\n" + e.getMessage()
+								+ "\n" + e.toString());
 					}
 				}
 			}
@@ -247,6 +253,12 @@ public class SystemNotificationFragment extends Fragment {
 		} catch (Exception e) {
 			Log.e(TAG, "Exception showing dialog :( \n::\n " + e.toString());
 		}
+		dialog.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				vibrator.cancel();
+			}
+		});
 	}
 
 	private void setRefreshAction(ViewGroup rootView) {
@@ -279,7 +291,7 @@ public class SystemNotificationFragment extends Fragment {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			try {
-				if (pDialog!=null && !pDialog.isShowing() && isNewRefresh) {
+				if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
 					pDialog.setMessage("Refreshing noifictions...");
 					pDialog.setCancelable(false);
 					pDialog.setIndeterminate(true);
@@ -433,15 +445,12 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private void vibratePhone() {
-		// Set the pattern for vibration
-		// long pattern[] = { 0, 200, 100, 300, 400 };
-		// // Start the vibration
-		// Vibrator vibrator = (Vibrator)
-		// tContext.getSystemService(Context.VIBRATOR_SERVICE);
-		// // start vibration with repeated count, use -1 if you don't want to
-		// // repeat the vibration
-		// vibrator.vibrate(pattern, 0);
-		((Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
+		// Start the vibration
+		// start vibration with repeated count, use -1 if you don't want to
+		// repeat the vibration
+		vibrator.vibrate(pattern, 0);
+		// ((Vibrator)
+		// tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
 	}
 
 	@Override

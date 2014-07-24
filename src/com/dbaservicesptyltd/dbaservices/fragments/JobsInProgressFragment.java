@@ -59,6 +59,7 @@ public class JobsInProgressFragment extends Fragment {
 	private NotifAdapter jobsAdapter;
 	private OnlineAdminRow adminObj;
 
+	@SuppressWarnings("unused")
 	private AdminClickListener adminClickListener;
 
 	private ImageView ivRefresh;

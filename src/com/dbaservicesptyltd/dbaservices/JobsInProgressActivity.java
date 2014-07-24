@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -77,6 +78,15 @@ public class JobsInProgressActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				showActionDialog((NotifItem) parent.getItemAtPosition(position));
+			}
+		});
+		findViewById(R.id.btn_msg_admin).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO input message & send it
+				Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+				sendIntent.setData(Uri.parse("sms:"));
+				tContext.startActivity(sendIntent);
 			}
 		});
 
