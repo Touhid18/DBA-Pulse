@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -15,17 +16,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -44,6 +52,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dbaservicesptyltd.dbaservices.MainActivity;
 import com.dbaservicesptyltd.dbaservices.R;
 import com.dbaservicesptyltd.dbaservices.adapter.NotifAdapter;
 import com.dbaservicesptyltd.dbaservices.model.NotifItem;
@@ -70,9 +79,9 @@ public class SystemNotificationFragment extends Fragment {
 	private boolean isNewRefresh = true;
 	private boolean isAsyncTaskRunning = false;
 	private Dialog dialog;
-	private Vibrator vibrator;
+	private static Vibrator vibrator;
 	// Set the pattern for vibration
-	private long pattern[] = { 0, 5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000 };
+	private static long pattern[] = { 0, 600, 50, 800, 5 * 1000 };
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
@@ -89,6 +98,8 @@ public class SystemNotificationFragment extends Fragment {
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
 		dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+		if (vibrator != null)
+			vibrator.cancel();
 		vibrator = (Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE);
 
 		setRefreshAction(rootView);
@@ -205,7 +216,44 @@ public class SystemNotificationFragment extends Fragment {
 		});
 	}
 
+	public static boolean isAppInForeground(Context context) {
+		List<RunningTaskInfo> task = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
+				.getRunningTasks(1);
+		if (task.isEmpty()) {
+			return false;
+		}
+		return task.get(0).topActivity.getPackageName().equalsIgnoreCase(context.getPackageName());
+	}
+
+	private static void notifyUser(NotifItem notifItem) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(tContext)
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setContentTitle("DBA Services")
+				.setContentText(
+						notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
+								+ ", " + "Unassigned");
+		Intent resultIntent = new Intent(tContext, MainActivity.class);
+		resultIntent.putExtra("stop_vibrator", true);
+
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(tContext);
+		stackBuilder.addParentStack(MainActivity.class);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+		NotificationManager mNotificationManager = (NotificationManager) tContext
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(101, mBuilder.build());
+		vibratePhone();
+
+	}
+
 	private void showActionDialog(final NotifItem notifItem) {
+		if (tContext == null)
+			return;
+		if (!isAppInForeground(tContext)) {
+			notifyUser(notifItem);
+			return;
+		}
 		try {
 			if (dialog != null && dialog.isShowing()) {
 				Log.i(TAG, "Cancelling previous dialog");
@@ -302,6 +350,8 @@ public class SystemNotificationFragment extends Fragment {
 			super.onPreExecute();
 			isAsyncTaskRunning = true;
 			try {
+				if(vibrator!=null)
+					vibrator.cancel();
 				if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
 					pDialog.setMessage("Refreshing noifictions...");
 					pDialog.setCancelable(false);
@@ -382,6 +432,8 @@ public class SystemNotificationFragment extends Fragment {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			isAsyncTaskRunning = true;
+			if(vibrator!=null)
+				vibrator.cancel();
 			if (!pDialog.isShowing()) {
 				pDialog.setMessage("Deciding the issue ...");
 				pDialog.setCancelable(false);
@@ -458,14 +510,26 @@ public class SystemNotificationFragment extends Fragment {
 		bld.create().show();
 	}
 
-	private void vibratePhone() {
+	private static void vibratePhone() {
 		// Start the vibration
 		// start vibration with repeated count, use -1 if you don't want to
 		// repeat the vibration
 		if (vibrator != null)
 			vibrator.vibrate(pattern, 0);
+		else if (tContext != null) {
+			vibrator = (Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE);
+			long pattern2[] = { 0, 600, 50, 800, 5 * 1000 };
+			vibrator.vibrate(pattern2, 0);
+		}
 		// ((Vibrator)
 		// tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		Log.i(TAG, "onResume: cancelling vibrator ...");
+		vibrator.cancel();
 	}
 
 	@Override
@@ -477,14 +541,6 @@ public class SystemNotificationFragment extends Fragment {
 	@Override
 	public void onDestroyView() {
 		Log.i("onDestroyView", "called");
-
-		if (refresherThread.isAlive())
-			refresherThread.interrupt();
-
-		scheduledNotifIdSet.clear();
-		scheduledNotifIdSet = null;
-		schThPoolExecutor.shutdown();
-		vibrator = null;
 		super.onDestroyView();
 	}
 
@@ -497,6 +553,14 @@ public class SystemNotificationFragment extends Fragment {
 	@Override
 	public void onDetach() {
 		Log.i("onDetach", "called");
+
+		// if (refresherThread.isAlive())
+		// refresherThread.interrupt();
+		//
+		// scheduledNotifIdSet.clear();
+		// scheduledNotifIdSet = null;
+		// schThPoolExecutor.shutdown();
+		// vibrator = null;
 		super.onDetach();
 	}
 }
