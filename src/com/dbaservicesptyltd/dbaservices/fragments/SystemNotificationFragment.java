@@ -98,8 +98,10 @@ public class SystemNotificationFragment extends Fragment {
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
 		dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-		if (vibrator != null)
+		if (vibrator != null){
 			vibrator.cancel();
+			vibrator = null;
+		}
 		vibrator = (Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE);
 
 		setRefreshAction(rootView);
@@ -408,6 +410,11 @@ public class SystemNotificationFragment extends Fragment {
 					alert("Malformed data received!");
 					e.printStackTrace();
 				}
+			}else{
+				if (pDialog.isShowing())
+					pDialog.dismiss();
+				new GetNotifications().execute();
+				return;
 			}
 
 			if (pDialog.isShowing())
@@ -520,11 +527,13 @@ public class SystemNotificationFragment extends Fragment {
 		if (vibrator != null) {
 			vibrator.cancel();
 			vibrator.vibrate(pattern, 0);
-		} else if (tContext != null) {
-			vibrator = (Vibrator) tContext.getSystemService(Context.VIBRATOR_SERVICE);
-			long pattern2[] = { 0, 600, 50, 800, 5 * 1000 };
-			vibrator.vibrate(pattern2, 0);
-		}
+		} 
+		// else if (tContext != null) {
+		// vibrator = (Vibrator)
+		// tContext.getSystemService(Context.VIBRATOR_SERVICE);
+		// long pattern2[] = { 0, 600, 50, 800, 5 * 1000 };
+		// vibrator.vibrate(pattern2, 0);
+		// }
 		// ((Vibrator)
 		// tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
 	}
