@@ -40,7 +40,7 @@ import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
 import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
 import com.dbaservicesptyltd.dbaservices.utils.Constants;
-import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
+import com.dbaservicesptyltd.dbaservices.utils.DBAServicePreferences;
 
 public class JobsInProgressActivity extends Activity {
 
@@ -203,7 +203,7 @@ public class JobsInProgressActivity extends Activity {
 
 			ServerResponse response = jsonParser.retrieveServerData(
 					Constants.REQUEST_TYPE_GET, url, null, null,
-					DBAServiceApplication.getAppAccessToken(tContext));
+					DBAServicePreferences.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<",
 						"success in retrieving job list for user_id: " + userId);
@@ -275,7 +275,7 @@ public class JobsInProgressActivity extends Activity {
 
 			ServerResponse response = jsonParser.retrieveServerData(
 					Constants.REQUEST_TYPE_POST, url, null, jObj.toString(),
-					DBAServiceApplication.getAppAccessToken(tContext));
+					DBAServicePreferences.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "success in retrieving notifications.");
 				JSONObject responseObj = response.getjObj();

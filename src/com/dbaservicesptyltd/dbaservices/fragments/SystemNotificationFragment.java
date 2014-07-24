@@ -50,7 +50,7 @@ import com.dbaservicesptyltd.dbaservices.model.NotifItem;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
 import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
 import com.dbaservicesptyltd.dbaservices.utils.Constants;
-import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
+import com.dbaservicesptyltd.dbaservices.utils.DBAServicePreferences;
 
 public class SystemNotificationFragment extends Fragment {
 
@@ -72,7 +72,7 @@ public class SystemNotificationFragment extends Fragment {
 	private Dialog dialog;
 	private Vibrator vibrator;
 	// Set the pattern for vibration
-	private long pattern[] = { 0, 5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000 };
+	private long pattern[] = { 0, 800, 5 * 1000, 800, 5 * 1000 };
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
@@ -318,7 +318,7 @@ public class SystemNotificationFragment extends Fragment {
 
 			try {
 				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
-						DBAServiceApplication.getAppAccessToken(tContext));
+						DBAServicePreferences.getAppAccessToken(tContext));
 				if (response.getStatus() == 200) {
 					Log.d(">>>><<<<", "success in retrieving notifications.");
 					JSONObject responseObj = response.getjObj();
@@ -405,7 +405,7 @@ public class SystemNotificationFragment extends Fragment {
 			}
 
 			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, url, null,
-					jObj.toString(), DBAServiceApplication.getAppAccessToken(tContext));
+					jObj.toString(), DBAServicePreferences.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "success in retrieving notifications.");
 				JSONObject responseObj = response.getjObj();

@@ -23,7 +23,7 @@ import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
 import com.dbaservicesptyltd.dbaservices.model.UserCred;
 import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
 import com.dbaservicesptyltd.dbaservices.utils.Constants;
-import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
+import com.dbaservicesptyltd.dbaservices.utils.DBAServicePreferences;
 
 /**
  * @author Touhid
@@ -39,8 +39,8 @@ public class LogInActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.log_in);
 
-		new DBAServiceApplication(LogInActivity.this);
-		String token = DBAServiceApplication.getAppAccessToken(LogInActivity.this);
+		new DBAServicePreferences(LogInActivity.this);
+		String token = DBAServicePreferences.getAppAccessToken(LogInActivity.this);
 		if (!( token.equals(null) || token.equals("none") ) ) {
 			Intent intent = new Intent(LogInActivity.this, MainActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -133,7 +133,7 @@ public class LogInActivity extends Activity {
 	}
 
 	private void completeLogin(JSONObject responseJson) {
-		DBAServiceApplication.setUserCred(UserCred.parseUserCred(responseJson), LogInActivity.this);
+		DBAServicePreferences.setUserCred(UserCred.parseUserCred(responseJson), LogInActivity.this);
 		Intent intent = new Intent(LogInActivity.this, MainActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
