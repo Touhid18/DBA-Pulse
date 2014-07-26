@@ -9,8 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -24,7 +22,8 @@ public class OnlineAdminRow {
 	private int user_id, actioned, ignored, resolved;
 	private boolean is_online;
 
-	public OnlineAdminRow(String adminName, int uId, int active, int pending, int resolved, boolean isOnLine) {
+	public OnlineAdminRow(String adminName, int uId, int active, int pending,
+			int resolved, boolean isOnLine) {
 		this.name = adminName;
 		this.user_id = uId;
 		this.actioned = active;
@@ -35,8 +34,9 @@ public class OnlineAdminRow {
 
 	@Override
 	public String toString() {
-		return "Name: " + name + ", user_id=" + user_id + ", actioned=" + actioned + ", ignored=" + ignored
-				+ ", resolved=" + resolved + ", is_online:" + is_online;
+		return "Name: " + name + ", user_id=" + user_id + ", actioned="
+				+ actioned + ", ignored=" + ignored + ", resolved=" + resolved
+				+ ", is_online:" + is_online;
 	}
 
 	/**
@@ -146,8 +146,9 @@ public class OnlineAdminRow {
 				JSONObject thisAdmin = adminArray.getJSONObject(i);
 				if (thisAdmin != null) {
 					String jsonString = thisAdmin.toString();
-					OnlineAdminRow admin = gson.fromJson(jsonString, OnlineAdminRow.class);
-					Log.d("parseAdminList",admin.toString());
+					OnlineAdminRow admin = gson.fromJson(jsonString,
+							OnlineAdminRow.class);
+					// Log.d("parseAdminList",admin.toString());
 					adminList.add(admin);
 				}
 			}

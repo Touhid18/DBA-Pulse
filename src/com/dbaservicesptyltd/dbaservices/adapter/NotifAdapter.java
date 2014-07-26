@@ -57,11 +57,11 @@ public class NotifAdapter extends ArrayAdapter<NotifItem> {
 
 		NotifItem item = getItem(position);
 		if (isNotifUnassigned(item))
-			holder.tvNotif.setText(item.getId()+") "+item.getDatetime() + " "
+			holder.tvNotif.setText(item.getDatetime() + " "
 					+ item.getDescription() + ", " + item.getClientName()
 					+ ", " + "Unassigned");
 		else
-			holder.tvNotif.setText(item.getId()+") "+item.getDatetime() + " "
+			holder.tvNotif.setText(item.getDatetime() + " "
 					+ item.getDescription() + ", " + item.getClientName()
 					+ ", [" + item.getUserName() + ", " + item.getUpdated()
 					+ "].");

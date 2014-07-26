@@ -112,10 +112,21 @@ public class SystemNotificationFragment extends Fragment {
 		}
 		vibrator = (Vibrator) tContext
 				.getSystemService(Context.VIBRATOR_SERVICE);
-
 		setRefreshAction(rootView);
-		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_notifs);
+		setListView(rootView);
+		
+		// Set looper
+		scheduledNotifIdSet = new HashSet<Integer>();
+		scheduledThreads = new HashMap<>();
+		schThPoolExecutor = (ScheduledThreadPoolExecutor) Executors
+				.newScheduledThreadPool(50);
+		setTwoMinuteNotifRefresher();
 
+		return rootView;
+	}
+
+	private void setListView(ViewGroup rootView) {
+		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_notifs);
 		notifList = new ArrayList<NotifItem>();
 		notifAdapter = new NotifAdapter(tContext, R.layout.notif_row, notifList);
 		lvNotifs.setAdapter(notifAdapter);
@@ -133,31 +144,21 @@ public class SystemNotificationFragment extends Fragment {
 							Toast.LENGTH_SHORT).show();
 			}
 		});
-
 		Button btnLvFooter = new Button(tContext);
 		btnLvFooter.setText("Load more ...");
 		btnLvFooter.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Log.d(TAG, "Load more clicked");
-				if (!noMoreData)
-					refreshCounter++;
-				else
+				if (noMoreData)
 					alert("No more data!");
-				new GetNotifications().execute();
+				else {
+					refreshCounter++;
+					new GetNotifications().execute();
+				}
 			}
 		});
 		lvNotifs.addFooterView(btnLvFooter);
-
-		// new GetNotifications().execute();
-		// Set looper
-		scheduledNotifIdSet = new HashSet<Integer>();
-		scheduledThreads = new HashMap<>();
-		schThPoolExecutor = (ScheduledThreadPoolExecutor) Executors
-				.newScheduledThreadPool(50);
-		setTwoMinuteNotifRefresher();
-
-		return rootView;
 	}
 
 	@Override
@@ -412,7 +413,16 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private void checkAndShowUnassignedalert() {
-		for (NotifItem ni : notifList) {
+		int st = refreshCounter * 20;
+		// If notifList is blank, or refreshCounter is over-increased, then
+		// ignore
+		if (notifList.size() <= 0 || st >= notifList.size())
+			return;
+		// Set the start point to 21,41,61 ... etc., while leaving for st=0
+		if (refreshCounter > 0)
+			++st;
+		List<NotifItem> niList = notifList.subList(st, notifList.size());
+		for (NotifItem ni : niList) {
 			if (ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
 					&& ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
 				isFromRefresh = true;
