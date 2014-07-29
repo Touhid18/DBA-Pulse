@@ -92,8 +92,9 @@ public class NotifAdapter extends ArrayAdapter<NotifItem> {
 		return super.getCount();
 	}
 
-	private boolean isNotifUnassigned(NotifItem item) {
+	public static boolean isNotifUnassigned(NotifItem item) {
 		if (item.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
+				|| item.getStatus() <= 0 || item.getStatus() > 4
 				|| item.getUpdated().equals("")
 				|| item.getUpdated().equals(null)
 				|| item.getUserName().equals("")

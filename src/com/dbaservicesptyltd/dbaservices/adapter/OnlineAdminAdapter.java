@@ -30,6 +30,7 @@ import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
  */
 public class OnlineAdminAdapter extends ArrayAdapter<OnlineAdminRow> {
 
+	@SuppressWarnings("unused")
 	private static final String TAG = OnlineAdminAdapter.class.getSimpleName();
 	private static Context tContext;
 

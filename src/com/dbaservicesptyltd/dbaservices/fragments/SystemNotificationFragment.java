@@ -114,7 +114,7 @@ public class SystemNotificationFragment extends Fragment {
 				.getSystemService(Context.VIBRATOR_SERVICE);
 		setRefreshAction(rootView);
 		setListView(rootView);
-		
+
 		// Set looper
 		scheduledNotifIdSet = new HashSet<Integer>();
 		scheduledThreads = new HashMap<>();
@@ -136,7 +136,7 @@ public class SystemNotificationFragment extends Fragment {
 					int position, long id) {
 				NotifItem notifItem = (NotifItem) parent
 						.getItemAtPosition(position);
-				if (notifItem.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED) {
+				if (NotifAdapter.isNotifUnassigned(notifItem)) {
 					isFromRefresh = false;
 					showActionDialog(notifItem);
 				} else
@@ -423,7 +423,8 @@ public class SystemNotificationFragment extends Fragment {
 			++st;
 		List<NotifItem> niList = notifList.subList(st, notifList.size());
 		for (NotifItem ni : niList) {
-			if (ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
+			if (NotifAdapter.isNotifUnassigned(ni)
+			// ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
 					&& ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
 				isFromRefresh = true;
 				showActionDialog(ni);
