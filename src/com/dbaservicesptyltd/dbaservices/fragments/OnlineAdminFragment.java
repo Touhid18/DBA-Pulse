@@ -41,7 +41,11 @@ public class OnlineAdminFragment extends Fragment {
 	private static ArrayList<OnlineAdminRow> adminList;
 	private OnlineAdminAdapter onlineAdminAdapter;
 
+<<<<<<< HEAD
 	private AdminClickListener adminClickListener;
+=======
+	// private static AdminClickListener adminClickListener;
+>>>>>>> f5fa06954d80681ee5d460720ec54cce5a7e4d8e
 
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
@@ -55,15 +59,24 @@ public class OnlineAdminFragment extends Fragment {
 	// OnlineAdminFragment.adminClickListener = adminClickListener;
 	// return new OnlineAdminFragment();
 	// }
+<<<<<<< HEAD
 	public OnlineAdminFragment(Context context, AdminClickListener adminClickListener) {
 		tContext = context;
 		this.adminClickListener = adminClickListener;
+=======
+	public OnlineAdminFragment(Context context) {
+		// , AdminClickListener adminClickListener) {
+		tContext = context;
+		// OnlineAdminFragment.adminClickListener = adminClickListener;
+>>>>>>> f5fa06954d80681ee5d460720ec54cce5a7e4d8e
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
 		Log.d(TAG, "inside OncreateView()");
-		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.online_admin, container, false);
+		ViewGroup rootView = (ViewGroup) inflater.inflate(
+				R.layout.online_admin, container, false);
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
@@ -72,10 +85,12 @@ public class OnlineAdminFragment extends Fragment {
 		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_admins);
 
 		adminList = new ArrayList<OnlineAdminRow>();
-		onlineAdminAdapter = new OnlineAdminAdapter(tContext, R.layout.online_admin_row, adminList);
+		onlineAdminAdapter = new OnlineAdminAdapter(tContext,
+				R.layout.online_admin_row, adminList);
 		lvNotifs.setAdapter(onlineAdminAdapter);
 		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
 			@Override
+<<<<<<< HEAD
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				OnlineAdminRow admin = (OnlineAdminRow) parent.getItemAtPosition(position);
 				Log.d(TAG, "New admin jobs showing: " + admin.getAdminName());
@@ -92,6 +107,23 @@ public class OnlineAdminFragment extends Fragment {
 				// intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
 				// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				// startActivity(intent);
+=======
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				OnlineAdminRow admin = (OnlineAdminRow) parent
+						.getItemAtPosition(position);
+				// adminClickListener.handleClick(true, admin);
+				Intent intent = new Intent(tContext,
+						JobsInProgressActivity.class);
+				intent.putExtra(Constants.U_ID, admin.getUserId());
+				intent.putExtra(Constants.U_NAME, admin.getAdminName());
+				intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
+				intent.putExtra(Constants.U_PENDING_COUNT, admin.getPending());
+				intent.putExtra(Constants.U_RESOLVED_COUNT, admin.getResolved());
+				intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+>>>>>>> f5fa06954d80681ee5d460720ec54cce5a7e4d8e
 			}
 		});
 
@@ -114,7 +146,8 @@ public class OnlineAdminFragment extends Fragment {
 
 	private void setRefreshAction(ViewGroup rootView) {
 		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_admin);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+		final Animation rotation = AnimationUtils.loadAnimation(tContext,
+				R.anim.rotate_refresh);
 		rotation.setRepeatCount(Animation.INFINITE);
 		ivRefresh.startAnimation(rotation);
 		ivRefresh.setOnClickListener(new OnClickListener() {
@@ -148,7 +181,8 @@ public class OnlineAdminFragment extends Fragment {
 			String url = Constants.URL_PARENT + "online_admin";
 
 			try {
-				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
+				ServerResponse response = jsonParser.retrieveServerData(
+						Constants.REQUEST_TYPE_GET, url, null, null,
 						DBAServiceApplication.getAppAccessToken(tContext));
 				if (response.getStatus() == 200) {
 					Log.d(">>>><<<<", "success in retrieving admin list.");
@@ -157,7 +191,8 @@ public class OnlineAdminFragment extends Fragment {
 				} else
 					return null;
 			} catch (Exception e) {
-				Log.e("JSONParser", "Exception in retrieveServerData" + e.toString());
+				Log.e("JSONParser",
+						"Exception in retrieveServerData" + e.toString());
 			}
 			return null;
 		}
@@ -169,7 +204,8 @@ public class OnlineAdminFragment extends Fragment {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						JSONArray adminArray = responseObj.getJSONArray("active_users");
+						JSONArray adminArray = responseObj
+								.getJSONArray("active_users");
 						adminList = OnlineAdminRow.parseAdminList(adminArray);
 						Log.e("???????", "admin count = " + adminList.size());
 
