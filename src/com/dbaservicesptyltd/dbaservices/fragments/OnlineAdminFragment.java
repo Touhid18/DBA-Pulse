@@ -10,7 +10,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,9 +25,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.dbaservicesptyltd.dbaservices.JobsInProgressActivity;
 import com.dbaservicesptyltd.dbaservices.R;
 import com.dbaservicesptyltd.dbaservices.adapter.OnlineAdminAdapter;
+import com.dbaservicesptyltd.dbaservices.interfaces.AdminClickListener;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
 import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
@@ -42,7 +41,7 @@ public class OnlineAdminFragment extends Fragment {
 	private static ArrayList<OnlineAdminRow> adminList;
 	private OnlineAdminAdapter onlineAdminAdapter;
 
-	//private static AdminClickListener adminClickListener;
+	private AdminClickListener adminClickListener;
 
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
@@ -56,10 +55,9 @@ public class OnlineAdminFragment extends Fragment {
 	// OnlineAdminFragment.adminClickListener = adminClickListener;
 	// return new OnlineAdminFragment();
 	// }
-	public OnlineAdminFragment(Context context){
-		//, AdminClickListener adminClickListener) {
+	public OnlineAdminFragment(Context context, AdminClickListener adminClickListener) {
 		tContext = context;
-		//OnlineAdminFragment.adminClickListener = adminClickListener;
+		this.adminClickListener = adminClickListener;
 	}
 
 	@Override
@@ -80,16 +78,20 @@ public class OnlineAdminFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				OnlineAdminRow admin = (OnlineAdminRow) parent.getItemAtPosition(position);
-				// adminClickListener.handleClick(true, admin);
-				Intent intent = new Intent(tContext, JobsInProgressActivity.class);
-				intent.putExtra(Constants.U_ID, admin.getUserId());
-				intent.putExtra(Constants.U_NAME, admin.getAdminName());
-				intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
-				intent.putExtra(Constants.U_PENDING_COUNT, admin.getPending());
-				intent.putExtra(Constants.U_RESOLVED_COUNT, admin.getResolved());
-				intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
+				Log.d(TAG, "New admin jobs showing: " + admin.getAdminName());
+				adminClickListener.handleClick(true, admin);
+				// Intent intent = new Intent(tContext,
+				// JobsInProgressActivity.class);
+				// intent.putExtra(Constants.U_ID, admin.getUserId());
+				// intent.putExtra(Constants.U_NAME, admin.getAdminName());
+				// intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
+				// intent.putExtra(Constants.U_PENDING_COUNT,
+				// admin.getPending());
+				// intent.putExtra(Constants.U_RESOLVED_COUNT,
+				// admin.getResolved());
+				// intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
+				// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				// startActivity(intent);
 			}
 		});
 
@@ -134,7 +136,10 @@ public class OnlineAdminFragment extends Fragment {
 				pDialog.setMessage("Refreshing admin list ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
-				pDialog.show();
+				// pDialog.show();
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				rotation.setRepeatCount(Animation.INFINITE);
+				ivRefresh.startAnimation(rotation);
 			}
 		}
 

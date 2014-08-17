@@ -3,6 +3,7 @@
  */
 package com.dbaservicesptyltd.dbaservices.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -18,8 +19,13 @@ import com.google.gson.GsonBuilder;
  * @author Touhid
  * 
  */
-public class OnlineAdminRow {
+public class OnlineAdminRow implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6619605883103797703L;
+	
 	private String name;
 	private int user_id, actioned, ignored, resolved;
 	private boolean is_online;

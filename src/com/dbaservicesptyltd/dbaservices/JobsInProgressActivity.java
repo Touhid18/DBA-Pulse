@@ -192,7 +192,10 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.setMessage("Refreshing job list ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
-				pDialog.show();
+				// pDialog.show();
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				rotation.setRepeatCount(Animation.INFINITE);
+				ivRefresh.startAnimation(rotation);
 			}
 		}
 
@@ -255,7 +258,10 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.setMessage("Deciding the issue ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
-				pDialog.show();
+				// pDialog.show();
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				rotation.setRepeatCount(Animation.INFINITE);
+				ivRefresh.startAnimation(rotation);
 			}
 		}
 

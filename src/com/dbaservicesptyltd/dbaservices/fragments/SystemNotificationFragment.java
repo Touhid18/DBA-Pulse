@@ -370,7 +370,10 @@ public class SystemNotificationFragment extends Fragment {
 					pDialog.setMessage("Refreshing noifictions...");
 					pDialog.setCancelable(false);
 					pDialog.setIndeterminate(true);
-					pDialog.show();
+					// pDialog.show();
+					final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+					rotation.setRepeatCount(Animation.INFINITE);
+					ivRefresh.startAnimation(rotation);
 				}
 			} catch (Exception e) {
 			}
@@ -458,7 +461,10 @@ public class SystemNotificationFragment extends Fragment {
 				pDialog.setMessage("Deciding the issue ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
-				pDialog.show();
+				// pDialog.show();
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				rotation.setRepeatCount(Animation.INFINITE);
+				ivRefresh.startAnimation(rotation);
 			}
 		}
 

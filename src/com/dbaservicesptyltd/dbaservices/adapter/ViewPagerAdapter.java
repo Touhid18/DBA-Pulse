@@ -36,7 +36,8 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 			return new SystemNotificationFragment(tContext);
 		else
 			// if (pageId == 1)
-			return new OnlineAdminFragment(tContext);// , adminClickListener);
+			return new OnlineAdminFragment(tContext, null);// TODO remove null ,
+															// adminClickListener);
 		// else if (NUM_PAGES > 2 && pageId == 2)
 		// return new JobsInProgressFragment(tContext, admin,
 		// adminClickListener);// TODO

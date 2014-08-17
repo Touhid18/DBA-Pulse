@@ -53,33 +53,47 @@ import com.dbaservicesptyltd.dbaservices.utils.DBAServiceApplication;
  */
 public class JobsInProgressFragment extends Fragment {
 
-	private static Context tContext;
-	private static final String TAG = "JobsInProgressActivity";
-	private static ArrayList<NotifItem> jobsList;
+	private Context tContext;
+	private final static String TAG = "JobsInProgressActivity";
+	private ArrayList<NotifItem> jobsList;
 	private NotifAdapter jobsAdapter;
-	private OnlineAdminRow adminObj;
+	// private OnlineAdminRow adminObj;
 
-	@SuppressWarnings("unused")
-	private AdminClickListener adminClickListener;
-
+	// @SuppressWarnings("unused")
+	// private AdminClickListener adminClickListener;
 	private ImageView ivRefresh;
 	private boolean isNewRefresh;
 
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	public JobsInProgressFragment(Context context, OnlineAdminRow admin, AdminClickListener adminClicker) {
+	private JobsInProgressFragment(Context context, OnlineAdminRow admin, AdminClickListener adminClicker) {
+		Log.d(TAG, "New admin: " + admin.getAdminName());
 		tContext = context;
-		adminObj = admin;
-		adminClickListener = adminClicker;
+		// adminObj = admin;
+		// adminClickListener = adminClicker;
+		// Log.i(TAG, "New admin: " + adminObj.getAdminName());
+	}
+
+	public static JobsInProgressFragment newInstance(Context context, OnlineAdminRow admin,
+			AdminClickListener adminClicker) {
+		JobsInProgressFragment jobs = new JobsInProgressFragment(context, admin, adminClicker);
+
+		Bundle b = new Bundle();
+		b.putSerializable("admin", admin);
+		jobs.setArguments(b);
+		Log.d(TAG, admin.toString());
+
+		return jobs;
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		Log.d(TAG, "inside OncreateView()");
+		Log.d(TAG, "inside onCreateView()");
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.jobs_progress, container, false);
 		// formAdminObj();
-		setAdminViews(rootView);
+		OnlineAdminRow adminObj = (OnlineAdminRow) getArguments().getSerializable("admin");
+		setAdminViews(rootView, adminObj);
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
@@ -110,8 +124,9 @@ public class JobsInProgressFragment extends Fragment {
 		// page by interface calling
 	}
 
-	private void setAdminViews(View rootView) {
+	private void setAdminViews(ViewGroup rootView, OnlineAdminRow adminObj) {
 		ImageView ivStatus = (ImageView) rootView.findViewById(R.id.iv_status);
+		Log.e(TAG, "setAdminViews : " + adminObj.getAdminName());
 		if (adminObj != null && adminObj.isOnline())
 			ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
 		((TextView) rootView.findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
@@ -133,6 +148,10 @@ public class JobsInProgressFragment extends Fragment {
 	// + ", " + isOnline);
 	// adminObj = new OnlineAdminRow(adminName, userId, active, pending,
 	// resolved, isOnline);
+	// }
+
+	// public OnlineAdminRow getAdmin() {
+	// return (OnlineAdminRow) getArguments().getSerializable("admin");
 	// }
 
 	private void setRefreshAction(ViewGroup rootView) {
@@ -199,12 +218,15 @@ public class JobsInProgressFragment extends Fragment {
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
 				// pDialog.show();
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				rotation.setRepeatCount(Animation.INFINITE);
+				ivRefresh.startAnimation(rotation);
 			}
 		}
 
 		@Override
 		protected JSONObject doInBackground(Void... params) {
-			int userId = adminObj.getUserId();
+			int userId = ((OnlineAdminRow) getArguments().getSerializable("admin")).getUserId();
 			String url = Constants.URL_PARENT + "in_progress/" + userId;
 
 			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
@@ -257,7 +279,10 @@ public class JobsInProgressFragment extends Fragment {
 				pDialog.setMessage("Deciding the issue ...");
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
-				pDialog.show();
+				// pDialog.show();
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				rotation.setRepeatCount(Animation.INFINITE);
+				ivRefresh.startAnimation(rotation);
 			}
 		}
 

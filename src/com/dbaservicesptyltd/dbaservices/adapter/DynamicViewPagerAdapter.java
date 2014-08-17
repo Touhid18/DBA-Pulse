@@ -20,22 +20,31 @@ import android.util.Log;
  */
 public class DynamicViewPagerAdapter extends FragmentPagerAdapter {
 
+	private final String TAG = "DynamicViewPagerAdapter";
 	@SuppressWarnings("unused")
-	private static Context tContext;
-	private static ArrayList<Fragment> fragList;
+	private Context tContext;
+	private ArrayList<Fragment> fragList;
 
 	public DynamicViewPagerAdapter(Context context, FragmentManager fm, ArrayList<Fragment> fragList) {
 		super(fm);
 		tContext = context;
-		DynamicViewPagerAdapter.fragList = fragList;
+		this.fragList = fragList;
 	}
 
 	@Override
 	public Fragment getItem(int position) {
 		return fragList.get(position);
 	}
-	
-	public void addJobsPage(JobsInProgressFragment jobsFrag){
+
+	public void addJobsPage(JobsInProgressFragment jobsFrag) {
+		Log.d(TAG, "addJobsPage : frag. list size = " + fragList.size());
+		if (fragList.size() > 2) {
+			for (int i = 2; fragList.size() > 2; i++)
+				fragList.remove(i);
+		}
+		Log.d(TAG, "addJobsPage : frag. list size = " + fragList.size());
+		// Log.d(TAG, "Admin of jobsFrag : " +
+		// jobsFrag.getAdmin().getAdminName());
 		fragList.add(jobsFrag);
 		notifyDataSetChanged();
 	}
@@ -45,18 +54,30 @@ public class DynamicViewPagerAdapter extends FragmentPagerAdapter {
 		return fragList.size();
 	}
 
-//	public void removeJobsPage() {
-//		fragList.remove(2);
-//		notifyDataSetChanged();
-//	}
+	@Override
+	public int getItemPosition(Object object) {
+		int i = fragList.indexOf(object);
+		if (i <= -1)
+			return POSITION_NONE;
+		else
+			return i;
+	}
+
+	// public void removeJobsPage() {
+	// fragList.remove(2);
+	// notifyDataSetChanged();
+	// }
 
 	public void removeJobsPage(ViewPager pager) {
-		Log.d("removeJobsPage","deleting jobs fragment");
-		fragList.remove(2);
+		Log.d("removeJobsPage", "deleting jobs fragment, fragList.size()=" + fragList.size());
+		if (fragList.size() > 2) {
+			for (int i = 2; fragList.size() > 2; i++)
+				fragList.remove(i);
+		}
 		try {
-			Object objectobject = this.instantiateItem(pager, 2);
-			if (objectobject != null)
-				destroyItem(pager, 2, objectobject);
+			Object obj = this.instantiateItem(pager, 2);
+			if (obj != null)
+				destroyItem(pager, 2, obj);
 		} catch (Exception e) {
 			Log.i("DELLA", "no more Fragment in FragmentPagerAdapter");
 		}
