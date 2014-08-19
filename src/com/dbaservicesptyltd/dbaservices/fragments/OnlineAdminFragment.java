@@ -41,11 +41,7 @@ public class OnlineAdminFragment extends Fragment {
 	private static ArrayList<OnlineAdminRow> adminList;
 	private OnlineAdminAdapter onlineAdminAdapter;
 
-<<<<<<< HEAD
 	private AdminClickListener adminClickListener;
-=======
-	// private static AdminClickListener adminClickListener;
->>>>>>> f5fa06954d80681ee5d460720ec54cce5a7e4d8e
 
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
@@ -59,16 +55,9 @@ public class OnlineAdminFragment extends Fragment {
 	// OnlineAdminFragment.adminClickListener = adminClickListener;
 	// return new OnlineAdminFragment();
 	// }
-<<<<<<< HEAD
 	public OnlineAdminFragment(Context context, AdminClickListener adminClickListener) {
 		tContext = context;
 		this.adminClickListener = adminClickListener;
-=======
-	public OnlineAdminFragment(Context context) {
-		// , AdminClickListener adminClickListener) {
-		tContext = context;
-		// OnlineAdminFragment.adminClickListener = adminClickListener;
->>>>>>> f5fa06954d80681ee5d460720ec54cce5a7e4d8e
 	}
 
 	@Override
@@ -90,7 +79,6 @@ public class OnlineAdminFragment extends Fragment {
 		lvNotifs.setAdapter(onlineAdminAdapter);
 		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-<<<<<<< HEAD
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				OnlineAdminRow admin = (OnlineAdminRow) parent.getItemAtPosition(position);
 				Log.d(TAG, "New admin jobs showing: " + admin.getAdminName());
@@ -107,23 +95,6 @@ public class OnlineAdminFragment extends Fragment {
 				// intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
 				// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				// startActivity(intent);
-=======
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				OnlineAdminRow admin = (OnlineAdminRow) parent
-						.getItemAtPosition(position);
-				// adminClickListener.handleClick(true, admin);
-				Intent intent = new Intent(tContext,
-						JobsInProgressActivity.class);
-				intent.putExtra(Constants.U_ID, admin.getUserId());
-				intent.putExtra(Constants.U_NAME, admin.getAdminName());
-				intent.putExtra(Constants.U_ACTIVE_COUNT, admin.getActive());
-				intent.putExtra(Constants.U_PENDING_COUNT, admin.getPending());
-				intent.putExtra(Constants.U_RESOLVED_COUNT, admin.getResolved());
-				intent.putExtra(Constants.U_IS_ONLINE, admin.isOnline());
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
->>>>>>> f5fa06954d80681ee5d460720ec54cce5a7e4d8e
 			}
 		});
 
