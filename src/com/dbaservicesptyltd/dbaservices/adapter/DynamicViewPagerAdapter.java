@@ -46,6 +46,8 @@ public class DynamicViewPagerAdapter extends FragmentPagerAdapter {
 		// Log.d(TAG, "Admin of jobsFrag : " +
 		// jobsFrag.getAdmin().getAdminName());
 		fragList.add(jobsFrag);
+		Log.d(TAG, "addJobsPage : frag. list size = " + fragList.size() + " after adding jobsFrag with admin: "
+				+ JobsInProgressFragment.adminObj.getAdminName());
 		notifyDataSetChanged();
 	}
 
