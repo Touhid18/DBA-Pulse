@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.dbaservicesptyltd.dbaservices"
-    android:versionCode="7"
+    android:versionCode="8"
     android:versionName="1.1" >
 
     <uses-sdk
@@ -16,12 +16,15 @@
 
     <application
         android:allowBackup="true"
+        android:configChanges="orientation|screenSize|keyboardHidden"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:screenOrientation="portrait"
         android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
         <activity
             android:name=".LogInActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,11 +33,13 @@
         </activity>
         <activity
             android:name="com.dbaservicesptyltd.dbaservices.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.dbaservicesptyltd.dbaservices.JobsInProgressActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
         </activity>
     </application>
 

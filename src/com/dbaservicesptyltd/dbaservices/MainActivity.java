@@ -2,6 +2,7 @@ package com.dbaservicesptyltd.dbaservices;
 
 import java.util.ArrayList;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -95,5 +96,8 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 			dvpAdapter.removeJobsPage(pager);
 			pager.setCurrentItem(1);
 		}
+	}
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
 	}
 }

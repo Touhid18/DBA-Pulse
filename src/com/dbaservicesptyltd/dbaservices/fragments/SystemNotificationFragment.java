@@ -587,13 +587,14 @@ public class SystemNotificationFragment extends Fragment {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
-							alert("Issue marked as actioned.");
-						else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
-							alert("Issue marked as resolved.");
-						else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
-							alert("Issue marked as ignored. This will again be prompted within 7 minutes");
+						// if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
+						// alert("Issue marked as actioned.");
+						// else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
+						// alert("Issue marked as resolved.");
+						// else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
+						// alert("Issue marked as ignored. This will again be prompted within 7 minutes");
 						ivRefresh.clearAnimation();
+						notifAdapter.notifyDataSetChanged();
 					} else {
 						alert("Invalid token.");
 						ivRefresh.clearAnimation();

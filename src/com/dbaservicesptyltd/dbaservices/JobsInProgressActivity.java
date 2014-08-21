@@ -15,6 +15,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -80,15 +81,16 @@ public class JobsInProgressActivity extends Activity {
 				showActionDialog((NotifItem) parent.getItemAtPosition(position));
 			}
 		});
-		findViewById(R.id.btn_msg_admin).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO input message & send it
-				Intent sendIntent = new Intent(Intent.ACTION_VIEW);
-				sendIntent.setData(Uri.parse("sms:"));
-				tContext.startActivity(sendIntent);
-			}
-		});
+		findViewById(R.id.btn_msg_admin).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						// TODO input message & send it
+						Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+						sendIntent.setData(Uri.parse("sms:"));
+						tContext.startActivity(sendIntent);
+					}
+				});
 
 		new GetAdminJobs().execute();
 	}
@@ -143,14 +145,17 @@ public class JobsInProgressActivity extends Activity {
 				android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 		dialog.setContentView(R.layout.action_dialog);
 
-		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.cancel();
-				new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-				new GetAdminJobs().execute();
-			}
-		});
+		dialog.findViewById(R.id.btn_action).setOnClickListener(
+				new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						dialog.cancel();
+						new DecideNotification().execute(
+								Constants.NOTIF_TYPE_ACTIONED,
+								notifItem.getId());
+						new GetAdminJobs().execute();
+					}
+				});
 		dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
 		dialog.findViewById(R.id.btn_resolved).setOnClickListener(
 				new OnClickListener() {
@@ -193,7 +198,8 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
 				// pDialog.show();
-				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				final Animation rotation = AnimationUtils.loadAnimation(
+						tContext, R.anim.rotate_refresh);
 				rotation.setRepeatCount(Animation.INFINITE);
 				ivRefresh.startAnimation(rotation);
 			}
@@ -259,7 +265,8 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
 				// pDialog.show();
-				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+				final Animation rotation = AnimationUtils.loadAnimation(
+						tContext, R.anim.rotate_refresh);
 				rotation.setRepeatCount(Animation.INFINITE);
 				ivRefresh.startAnimation(rotation);
 			}
@@ -341,6 +348,10 @@ public class JobsInProgressActivity extends Activity {
 				return id1 < id2 ? 1 : id1 == id2 ? 0 : -1;
 			}
 		});
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
 	}
 
 }
