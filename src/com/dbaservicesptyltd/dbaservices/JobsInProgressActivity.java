@@ -35,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.dbaservicesptyltd.dbaservices.adapter.NotifAdapter;
 import com.dbaservicesptyltd.dbaservices.model.NotifItem;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
@@ -60,6 +61,7 @@ public class JobsInProgressActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		BugSenseHandler.initAndStartSession(this, "5cd599a4");
 		setContentView(R.layout.jobs_progress);
 		tContext = JobsInProgressActivity.this;
 		formAdminObj();
@@ -76,21 +78,19 @@ public class JobsInProgressActivity extends Activity {
 		lvNotifs.setAdapter(jobsAdapter);
 		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				showActionDialog((NotifItem) parent.getItemAtPosition(position));
 			}
 		});
-		findViewById(R.id.btn_msg_admin).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						// TODO input message & send it
-						Intent sendIntent = new Intent(Intent.ACTION_VIEW);
-						sendIntent.setData(Uri.parse("sms:"));
-						tContext.startActivity(sendIntent);
-					}
-				});
+		findViewById(R.id.btn_msg_admin).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO input message & send it
+				Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+				sendIntent.setData(Uri.parse("sms:"));
+				tContext.startActivity(sendIntent);
+			}
+		});
 
 		new GetAdminJobs().execute();
 	}
@@ -98,16 +98,11 @@ public class JobsInProgressActivity extends Activity {
 	private void setAdminViews() {
 		ImageView ivStatus = (ImageView) findViewById(R.id.iv_status);
 		if (adminObj.isOnline())
-			ivStatus.setImageBitmap(BitmapFactory.decodeResource(
-					tContext.getResources(), R.drawable.status_online));
-		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj
-				.getAdminName());
-		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj
-				.getActive() + "");
-		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj
-				.getPending() + "");
-		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj
-				.getResolved() + "");
+			ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
+		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
+		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
+		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
+		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
 	}
 
 	private void formAdminObj() {
@@ -118,16 +113,14 @@ public class JobsInProgressActivity extends Activity {
 		int pending = intent.getIntExtra(Constants.U_PENDING_COUNT, 0);
 		int resolved = intent.getIntExtra(Constants.U_RESOLVED_COUNT, 0);
 		boolean isOnline = intent.getBooleanExtra(Constants.U_IS_ONLINE, false);
-		Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active
-				+ ", " + pending + ", " + resolved + ", " + isOnline);
-		adminObj = new OnlineAdminRow(adminName, userId, active, pending,
-				resolved, isOnline);
+		Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active + ", " + pending + ", " + resolved
+				+ ", " + isOnline);
+		adminObj = new OnlineAdminRow(adminName, userId, active, pending, resolved, isOnline);
 	}
 
 	private void setRefreshAction() {
 		ivRefresh = (ImageView) findViewById(R.id.iv_refresh_jobs);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext,
-				R.anim.rotate_refresh);
+		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
 		rotation.setRepeatCount(Animation.INFINITE);
 		ivRefresh.startAnimation(rotation);
 		ivRefresh.setOnClickListener(new OnClickListener() {
@@ -141,33 +134,26 @@ public class JobsInProgressActivity extends Activity {
 	}
 
 	private void showActionDialog(final NotifItem notifItem) {
-		final Dialog dialog = new Dialog(tContext,
-				android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+		final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 		dialog.setContentView(R.layout.action_dialog);
 
-		dialog.findViewById(R.id.btn_action).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						dialog.cancel();
-						new DecideNotification().execute(
-								Constants.NOTIF_TYPE_ACTIONED,
-								notifItem.getId());
-						new GetAdminJobs().execute();
-					}
-				});
+		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.cancel();
+				new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
+				new GetAdminJobs().execute();
+			}
+		});
 		dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
-		dialog.findViewById(R.id.btn_resolved).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						dialog.cancel();
-						new DecideNotification().execute(
-								Constants.NOTIF_TYPE_RESOLVED,
-								notifItem.getId());
-						new GetAdminJobs().execute();
-					}
-				});
+		dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.cancel();
+				new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+				new GetAdminJobs().execute();
+			}
+		});
 		String head = "";
 		if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
 			head = "CRITICAL ALERT RECEIVED";
@@ -178,8 +164,7 @@ public class JobsInProgressActivity extends Activity {
 		TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
 		tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
 		TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
-		tvBody.setText(notifItem.getDatetime() + " "
-				+ notifItem.getDescription() + ", " + notifItem.getClientName()
+		tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
 				+ ", " + notifItem.getUpdated());
 		// Center-focus the dialog
 		Window window = dialog.getWindow();
@@ -198,8 +183,7 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
 				// pDialog.show();
-				final Animation rotation = AnimationUtils.loadAnimation(
-						tContext, R.anim.rotate_refresh);
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
 				rotation.setRepeatCount(Animation.INFINITE);
 				ivRefresh.startAnimation(rotation);
 			}
@@ -210,12 +194,10 @@ public class JobsInProgressActivity extends Activity {
 			int userId = adminObj.getUserId();
 			String url = Constants.URL_PARENT + "in_progress/" + userId;
 
-			ServerResponse response = jsonParser.retrieveServerData(
-					Constants.REQUEST_TYPE_GET, url, null, null,
+			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
 					DBAServiceApplication.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
-				Log.d(">>>><<<<",
-						"success in retrieving job list for user_id: " + userId);
+				Log.d(">>>><<<<", "success in retrieving job list for user_id: " + userId);
 				JSONObject responseObj = response.getjObj();
 				return responseObj;
 			} else
@@ -229,8 +211,7 @@ public class JobsInProgressActivity extends Activity {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						JSONArray jobsArray = responseObj
-								.getJSONArray("jobs_in_progress");
+						JSONArray jobsArray = responseObj.getJSONArray("jobs_in_progress");
 						jobsList = NotifItem.parseNotifList(jobsArray);
 						Log.e("???????", "jobs count = " + jobsList.size());
 						sortJobsList();
@@ -252,8 +233,7 @@ public class JobsInProgressActivity extends Activity {
 		}
 	}
 
-	private class DecideNotification extends
-			AsyncTask<Integer, Void, JSONObject> {
+	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
 
 		private int actionCode;
 
@@ -265,8 +245,7 @@ public class JobsInProgressActivity extends Activity {
 				pDialog.setCancelable(false);
 				pDialog.setIndeterminate(true);
 				// pDialog.show();
-				final Animation rotation = AnimationUtils.loadAnimation(
-						tContext, R.anim.rotate_refresh);
+				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
 				rotation.setRepeatCount(Animation.INFINITE);
 				ivRefresh.startAnimation(rotation);
 			}
@@ -286,9 +265,8 @@ public class JobsInProgressActivity extends Activity {
 				e.printStackTrace();
 			}
 
-			ServerResponse response = jsonParser.retrieveServerData(
-					Constants.REQUEST_TYPE_POST, url, null, jObj.toString(),
-					DBAServiceApplication.getAppAccessToken(tContext));
+			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, url, null,
+					jObj.toString(), DBAServiceApplication.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "success in retrieving notifications.");
 				JSONObject responseObj = response.getjObj();

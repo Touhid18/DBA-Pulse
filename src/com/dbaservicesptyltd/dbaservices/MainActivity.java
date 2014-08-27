@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.dbaservicesptyltd.dbaservices.adapter.DynamicViewPagerAdapter;
 import com.dbaservicesptyltd.dbaservices.fragments.JobsInProgressFragment;
 import com.dbaservicesptyltd.dbaservices.fragments.OnlineAdminFragment;
@@ -28,6 +29,7 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		BugSenseHandler.initAndStartSession(this, "5cd599a4");
 		setContentView(R.layout.activity_main);
 
 		pager = (ViewPager) findViewById(R.id.pager);
@@ -97,6 +99,7 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 			pager.setCurrentItem(1);
 		}
 	}
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 	}

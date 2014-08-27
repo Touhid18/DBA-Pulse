@@ -20,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
 import com.dbaservicesptyltd.dbaservices.model.UserCred;
 import com.dbaservicesptyltd.dbaservices.parser.JsonParser;
@@ -38,11 +39,11 @@ public class LogInActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		BugSenseHandler.initAndStartSession(this, "5cd599a4");
 		setContentView(R.layout.log_in);
 
 		new DBAServiceApplication(LogInActivity.this);
-		String token = DBAServiceApplication
-				.getAppAccessToken(LogInActivity.this);
+		String token = DBAServiceApplication.getAppAccessToken(LogInActivity.this);
 		if (!(token.equals(null) || token.equals("none"))) {
 			Intent intent = new Intent(LogInActivity.this, MainActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -64,10 +65,8 @@ public class LogInActivity extends Activity {
 	}
 
 	private void logIn() {
-		String email = ((EditText) findViewById(R.id.et_user_email)).getText()
-				.toString();
-		String pwd = ((EditText) findViewById(R.id.et_pwd)).getText()
-				.toString();
+		String email = ((EditText) findViewById(R.id.et_user_email)).getText().toString();
+		String pwd = ((EditText) findViewById(R.id.et_pwd)).getText().toString();
 		new LogInAsyncTask().execute(email, pwd);
 	}
 
@@ -100,8 +99,8 @@ public class LogInActivity extends Activity {
 			}
 			String loginData = loginObj.toString();
 
-			ServerResponse response = jsonParser.retrieveServerData(
-					Constants.REQUEST_TYPE_POST, url, null, loginData, null);
+			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, url, null, loginData,
+					null);
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "log in successful");
 				JSONObject responseObj = response.getjObj();
@@ -137,8 +136,7 @@ public class LogInActivity extends Activity {
 	}
 
 	private void completeLogin(JSONObject responseJson) {
-		DBAServiceApplication.setUserCred(UserCred.parseUserCred(responseJson),
-				LogInActivity.this);
+		DBAServiceApplication.setUserCred(UserCred.parseUserCred(responseJson), LogInActivity.this);
 		Intent intent = new Intent(LogInActivity.this, MainActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
