@@ -6,6 +6,7 @@ import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.dbaservicesptyltd.dbaservices.model.UserCred;
 
 /**
@@ -18,16 +19,17 @@ public class DBAServiceApplication {
 	protected static SharedPreferences prefs;
 
 	public DBAServiceApplication(Context context) {
-		DBAServiceApplication.mContext = context;
+		mContext = context;
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		BugSenseHandler.initAndStartSession(mContext, "5cd599a4");
 	}
 
-//	/** Returns a singleton instance of the application */
-//	public static DBAServiceApplication getAppInstance() {
-//		if (appInstance == null)
-//			appInstance = new DBAServiceApplication();
-//		return appInstance;
-//	}
+	// /** Returns a singleton instance of the application */
+	// public static DBAServiceApplication getAppInstance() {
+	// if (appInstance == null)
+	// appInstance = new DBAServiceApplication();
+	// return appInstance;
+	// }
 
 	public static Context getAppContext() {
 		return mContext;
@@ -73,7 +75,7 @@ public class DBAServiceApplication {
 		editor.putString(Constants.USER_FIRST_NAME, userCred.getFirstname());
 		editor.putString(Constants.USER_LAST_NAME, userCred.getLastname());
 		editor.commit();
-		Log.d("DBAServiceApplication","setUserCred: Saved as ::\n "+userCred.toString());
+		Log.d("DBAServiceApplication", "setUserCred: Saved as ::\n " + userCred.toString());
 	}
 
 	public static UserCred getUserCred(Context context) {
@@ -101,8 +103,8 @@ public class DBAServiceApplication {
 		String token = prefs.getString(Constants.ACCESS_TOKEN, "none");
 		return token;
 	}
-	
-	public static int getUserId(Context context){
+
+	public static int getUserId(Context context) {
 		if (prefs == null)
 			prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getInt(Constants.USER_ID, 0);
