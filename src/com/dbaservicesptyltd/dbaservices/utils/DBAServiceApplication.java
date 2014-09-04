@@ -1,5 +1,6 @@
 package com.dbaservicesptyltd.dbaservices.utils;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -13,7 +14,7 @@ import com.dbaservicesptyltd.dbaservices.model.UserCred;
  * Singleton class to return the application, which handles the preference
  * values
  */
-public class DBAServiceApplication {
+public class DBAServiceApplication extends Application{
 
 	private static Context mContext;
 	protected static SharedPreferences prefs;
@@ -23,6 +24,10 @@ public class DBAServiceApplication {
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		BugSenseHandler.initAndStartSession(mContext, "5cd599a4");
 	}
+	public DBAServiceApplication() {
+		DBAServiceApplication.mContext = getApplicationContext();
+		prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+	}
 
 	// /** Returns a singleton instance of the application */
 	// public static DBAServiceApplication getAppInstance() {
@@ -31,7 +36,9 @@ public class DBAServiceApplication {
 	// return appInstance;
 	// }
 
-	public static Context getAppContext() {
+	public Context getAppContext() {
+		if(mContext==null)
+			mContext= getApplicationContext();
 		return mContext;
 	}
 

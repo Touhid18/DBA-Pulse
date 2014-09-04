@@ -71,7 +71,7 @@ public class SystemNotificationFragment extends Fragment {
 	private Set<Integer> scheduledNotifIdSet;
 	private HashMap<Integer, ScheduledFuture<?>> scheduledThreads;
 
-	private static Context tContext;
+	private Context tContext;
 	private static final String TAG = "SystemNotificationFragment";
 	private static ArrayList<NotifItem> notifList;
 	private NotifAdapter notifAdapter;
@@ -95,6 +95,10 @@ public class SystemNotificationFragment extends Fragment {
 
 	public SystemNotificationFragment(Context context) {
 		tContext = context;
+	}
+
+	public SystemNotificationFragment() {
+		tContext = (Context) getActivity();
 	}
 
 	@Override
@@ -167,63 +171,73 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private void setTwoMinuteNotifRefresher() {
-		refresherHandler = new Handler();
-		refresherThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					if (Thread.interrupted()) {
-						Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
-						break;
-					}
-					try {
-						Thread.sleep(2 * 60 * 1000);
+		try {
+			refresherHandler = new Handler();
+			refresherThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
 						if (Thread.interrupted()) {
 							Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
 							break;
 						}
-						refresherHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								Log.d(":D", "2min refresher being run...");
-								if (dialog.isShowing())
-									dialog.cancel();
-								if (!isAsyncTaskRunning) {
-									noMoreData = false;
-									refreshCounter = 0;
-									new GetNotifications().execute();
-								}
+						try {
+							Thread.sleep(2 * 60 * 1000);
+							if (Thread.interrupted()) {
+								Log.i("-_-", "2min refresher thread interrupted, so exiting the loop.");
+								break;
 							}
-						});
-					} catch (Exception e) {
-						Log.d(":(", "exception inside 2 min refresher ::\n" + e.getCause() + "\n" + e.getMessage()
-								+ "\n" + e.toString());
+							refresherHandler.post(new Runnable() {
+								@Override
+								public void run() {
+									Log.d(":D", "2min refresher being run...");
+									if (dialog.isShowing())
+										dialog.cancel();
+									if (!isAsyncTaskRunning) {
+										noMoreData = false;
+										refreshCounter = 0;
+										new GetNotifications().execute();
+									}
+								}
+							});
+						} catch (Exception e) {
+							Log.d(":(", "exception inside 2 min refresher ::\n" + e.getCause() + "\n" + e.getMessage()
+									+ "\n" + e.toString());
+						}
 					}
 				}
-			}
-		});
-		refresherThread.start();
+			});
+			refresherThread.start();
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside setTwoMinuteNotifRefresher:: " + e.getMessage());
+		}
 	}
 
 	private void setRelooperForTheIgnoredNotif(final NotifItem notifItem) {
-		final int notifId = notifItem.getId();
-		final String notifDesc = notifItem.getDescription();
-		if (scheduledNotifIdSet.contains((Integer) notifId) || scheduledThreads.containsKey(notifId))
-			return;
-		Log.d("setRelooperForTheIgnoredNotif", "Scheduling for " + notifId + ", " + notifDesc);
-		scheduledNotifIdSet.add((Integer) notifId);
-		ScheduledFuture<?> t = schThPoolExecutor.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				Log.d("setRelooperForTheIgnoredNotif", "Dialog for " + notifId + ", " + notifDesc);
-				if (isIssueAssigned(notifId)) {
-					scheduledThreads.get(notifId).cancel(false);
-					return;
+		try {
+			final int notifId = notifItem.getId();
+			final String notifDesc = notifItem.getDescription();
+			if (scheduledNotifIdSet.contains((Integer) notifId) || scheduledThreads.containsKey(notifId))
+				return;
+			Log.d("setRelooperForTheIgnoredNotif", "Scheduling for " + notifId + ", " + notifDesc);
+			scheduledNotifIdSet.add((Integer) notifId);
+			ScheduledFuture<?> t = schThPoolExecutor.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					Log.d("setRelooperForTheIgnoredNotif", "Dialog for " + notifId + ", " + notifDesc);
+					if (isIssueAssigned(notifId)) {
+						scheduledThreads.get(notifId).cancel(false);
+						return;
+					}
+					runTheDialog(notifItem);
 				}
-				runTheDialog(notifItem);
-			}
-		}, 7, 7, TimeUnit.MINUTES);
-		scheduledThreads.put(notifId, t);
+			}, 7, 7, TimeUnit.MINUTES);
+			scheduledThreads.put(notifId, t);
+
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside setRelooperForTheIgnoredNotif with notif.:: " + notifItem.getDescription()
+					+ "\n" + e.getMessage());
+		}
 	}
 
 	private boolean isIssueAssigned(int notifId) {
@@ -235,188 +249,228 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private void runTheDialog(final NotifItem notifItem) {
-		Log.d("runTheDialog", "Run dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
-		getActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Log.d("runOnUiThread", "The dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
-				// Toast.makeText(tContext, "Notif Id:" + notifItem.getId(),
-				// Toast.LENGTH_SHORT).show();
-				isFromRefresh = true;
-				showActionDialog(notifItem);
-			}
-		});
+		try {
+			Log.d("runTheDialog", "Run dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					Log.d("runOnUiThread", "The dialog for " + notifItem.getId() + ", " + notifItem.getDescription());
+					// Toast.makeText(tContext, "Notif Id:" + notifItem.getId(),
+					// Toast.LENGTH_SHORT).show();
+					isFromRefresh = true;
+					showActionDialog(notifItem);
+				}
+			});
+
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Exception inside runTheDialog with notif.:: " + notifItem.getDescription() + "\n" + e.getMessage());
+		}
 	}
 
 	public static boolean isAppInForeground(Context context) {
-		List<RunningTaskInfo> task = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
-				.getRunningTasks(1);
-		if (task.isEmpty()) {
+		try {
+			List<RunningTaskInfo> task = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
+					.getRunningTasks(1);
+			if (task.isEmpty()) {
+				return false;
+			}
+			return task.get(0).topActivity.getPackageName().equalsIgnoreCase(context.getPackageName());
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside isAppInForeground ::\n" + e.getMessage());
 			return false;
 		}
-		return task.get(0).topActivity.getPackageName().equalsIgnoreCase(context.getPackageName());
 	}
 
-	private static void notifyUser(NotifItem notifItem) {
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(tContext)
-				.setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle("DBA Services")
-				.setContentText(
-						notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
-								+ ", " + "Unassigned");
-		mBuilder.setAutoCancel(true);
-		// mBuilder.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
-		Intent resultIntent = new Intent(tContext, MainActivity.class);
-		resultIntent.putExtra("stop_vibrator", true);
-		resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	private void notifyUser(NotifItem notifItem) {
+		try {
+			if (tContext == null) {
+				DBAServiceApplication app = new DBAServiceApplication();
+				tContext = app.getAppContext();
+			}
+			NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(tContext)
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle("DBA Services")
+					.setContentText(
+							notifItem.getDatetime() + " " + notifItem.getDescription() + ", "
+									+ notifItem.getClientName() + ", " + "Unassigned");
+			mBuilder.setAutoCancel(true);
+			// mBuilder.getNotification().flags |=
+			// Notification.FLAG_AUTO_CANCEL;
+			Intent resultIntent = new Intent(tContext, MainActivity.class);
+			resultIntent.putExtra("stop_vibrator", true);
+			resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(tContext);
-		stackBuilder.addParentStack(MainActivity.class);
-		stackBuilder.addNextIntent(resultIntent);
-		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(resultPendingIntent);
-		NotificationManager mNotificationManager = (NotificationManager) tContext
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(101, mBuilder.build());
-		vibratePhone();
+			TaskStackBuilder stackBuilder = TaskStackBuilder.create(tContext);
+			stackBuilder.addParentStack(MainActivity.class);
+			stackBuilder.addNextIntent(resultIntent);
+			PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+			mBuilder.setContentIntent(resultPendingIntent);
+			NotificationManager mNotificationManager = (NotificationManager) tContext
+					.getSystemService(Context.NOTIFICATION_SERVICE);
+			mNotificationManager.notify(101, mBuilder.build());
+			vibratePhone();
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Exception inside notifyUser with notif.:: " + notifItem.getDescription() + "\n" + e.getMessage());
+		}
 
 	}
 
 	private void showActionDialog(final NotifItem notifItem) {
-		if (tContext == null)
-			return;
-		if (!isAppInForeground(tContext)) {
-			notifyUser(notifItem);
-			return;
-		}
 		try {
-			if (dialog != null && dialog.isShowing()) {
-				Log.i(TAG, "Cancelling previous dialog");
-				dialog.cancel();
+			if (tContext == null)
+				return;
+			if (!isAppInForeground(tContext)) {
+				notifyUser(notifItem);
+				return;
 			}
-			dialog.setContentView(R.layout.action_dialog);
-			dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
+			try {
+				if (dialog != null && dialog.isShowing()) {
+					Log.i(TAG, "Cancelling previous dialog");
 					dialog.cancel();
-					if (!isAsyncTaskRunning) {
-						new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-						noMoreData = false;
-						refreshCounter = 0;
-						new GetNotifications().execute();
+				}
+				dialog.setContentView(R.layout.action_dialog);
+				dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						dialog.cancel();
+						if (!isAsyncTaskRunning) {
+							new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
+							noMoreData = false;
+							refreshCounter = 0;
+							new GetNotifications().execute();
+						}
 					}
-				}
-			});
-			dialog.findViewById(R.id.btn_ignore).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					dialog.cancel();
-					setRelooperForTheIgnoredNotif(notifItem);
-				}
-			});
-			dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					dialog.cancel();
-					if (!isAsyncTaskRunning) {
-						new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
-						noMoreData = false;
-						refreshCounter = 0;
-						new GetNotifications().execute();
+				});
+				dialog.findViewById(R.id.btn_ignore).setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						dialog.cancel();
+						setRelooperForTheIgnoredNotif(notifItem);
 					}
-				}
-			});
-			String head = "";
-			if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
-				head = "CRITICAL ALERT RECEIVED";
-			else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
-				head = "WARNING RECEIVED";
-			else
-				head = "Notification Received";
-			TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
-			tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
-			TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
-			tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", "
-					+ notifItem.getClientName() + ", " + notifItem.getUpdated());
-			// Center-focus the dialog
-			Window window = dialog.getWindow();
-			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			window.setGravity(Gravity.CENTER);
-			showVisibleDialog();
-			if (isFromRefresh)
-				vibratePhone();
-		} catch (Exception e) {
-			Log.e(TAG, "Exception showing dialog :( \n::\n " + e.toString());
-			if (vibrator != null)
-				vibrator.cancel();
-		}
-		dialog.setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
+				});
+				dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						dialog.cancel();
+						if (!isAsyncTaskRunning) {
+							new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+							noMoreData = false;
+							refreshCounter = 0;
+							new GetNotifications().execute();
+						}
+					}
+				});
+				String head = "";
+				if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
+					head = "CRITICAL ALERT RECEIVED";
+				else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
+					head = "WARNING RECEIVED";
+				else
+					head = "Notification Received";
+				TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
+				tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
+				TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
+				tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", "
+						+ notifItem.getClientName() + ", " + notifItem.getUpdated());
+				// Center-focus the dialog
+				Window window = dialog.getWindow();
+				window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				window.setGravity(Gravity.CENTER);
+				showVisibleDialog();
+				if (isFromRefresh)
+					vibratePhone();
+			} catch (Exception e) {
+				Log.e(TAG, "Exception showing dialog :( \n::\n " + e.toString());
 				if (vibrator != null)
 					vibrator.cancel();
 			}
-		});
+			dialog.setOnCancelListener(new OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					if (vibrator != null)
+						vibrator.cancel();
+				}
+			});
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Exception inside showActionDialog with notif.:: " + notifItem.getDescription() + "\n"
+							+ e.getMessage());
+		}
+
 	}
 
 	private void showVisibleDialog() {
-		final ScheduledThreadPoolExecutor s = ((ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(2));
-		s.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				if (!isADialogOnScreen) {
-					Log.i(TAG, "Showing the pending dialog");
-					getActivity().runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							dialog.show();
-						}
-					});
-					s.remove(this);
-					Log.i(TAG, "Shutting down the Sch.-thread-pool-Executor");
-					s.shutdown();
+		try {
+			final ScheduledThreadPoolExecutor s = ((ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(2));
+			s.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					if (!isADialogOnScreen) {
+						Log.i(TAG, "Showing the pending dialog");
+						getActivity().runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								dialog.show();
+							}
+						});
+						s.remove(this);
+						Log.i(TAG, "Shutting down the Sch.-thread-pool-Executor");
+						s.shutdown();
+					}
 				}
-			}
-		}, 100, 1 * 1000, TimeUnit.MILLISECONDS);
+			}, 100, 1 * 1000, TimeUnit.MILLISECONDS);
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside showVisibleDialog ::\n" + e.getMessage());
+		}
 	}
 
 	private void setRefreshAction(ViewGroup rootView) {
-		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
-		rotation.setRepeatCount(Animation.INFINITE);
-		ivRefresh.startAnimation(rotation);
-		ivRefresh.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ivRefresh.startAnimation(rotation);
-				if (!isAsyncTaskRunning) {
-					isNewRefresh = false;
-					noMoreData = false;
-					refreshCounter = 0;
-					new GetNotifications().execute();
+		try {
+			ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh);
+			final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+			rotation.setRepeatCount(Animation.INFINITE);
+			ivRefresh.startAnimation(rotation);
+			ivRefresh.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					ivRefresh.startAnimation(rotation);
+					if (!isAsyncTaskRunning) {
+						isNewRefresh = false;
+						noMoreData = false;
+						refreshCounter = 0;
+						new GetNotifications().execute();
+					}
 				}
-			}
-		});
+			});
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside setRefreshAction :: \n" + e.getMessage());
+		}
 	}
 
 	private void checkAndShowUnassignedalert() {
-		int st = refreshCounter * 20;
-		// If notifList is blank, or refreshCounter is over-increased, then
-		// ignore
-		if (notifList.size() <= 0 || st >= notifList.size())
-			return;
-		// Set the start point to 21,41,61 ... etc., while leaving for st=0
-		if (refreshCounter > 0)
-			++st;
-		List<NotifItem> niList = notifList.subList(st, notifList.size());
-		for (NotifItem ni : niList) {
-			if (NotifAdapter.isNotifUnassigned(ni)
-			// ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
-					&& ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
-				isFromRefresh = true;
-				showActionDialog(ni);
+		try {
+			int st = refreshCounter * 20;
+			// If notifList is blank, or refreshCounter is over-increased, then
+			// ignore
+			if (notifList.size() <= 0 || st >= notifList.size())
 				return;
+			// Set the start point to 21,41,61 ... etc., while leaving for st=0
+			if (refreshCounter > 0)
+				++st;
+			List<NotifItem> niList = notifList.subList(st, notifList.size());
+			for (NotifItem ni : niList) {
+				if (NotifAdapter.isNotifUnassigned(ni)
+				// ni.getStatus() == Constants.NOTIF_TYPE_UNASSIGNED
+						&& ni.getSeverity() == Constants.NOTIF_SEVERITY_ALERT) {
+					isFromRefresh = true;
+					showActionDialog(ni);
+					return;
+				}
 			}
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside checkAndShowUnassignedalert :: \n" + e.getMessage());
 		}
 	}
 
@@ -517,22 +571,33 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	private void sortNotifList() {
-		Collections.sort(notifList, new Comparator<NotifItem>() {
-			@Override
-			public int compare(NotifItem lhs, NotifItem rhs) {
-				int id1 = lhs.getId();
-				int id2 = rhs.getId();
-				return id1 < id2 ? 1 : id1 == id2 ? 0 : -1;
-			}
-		});
+		try {
+			Collections.sort(notifList, new Comparator<NotifItem>() {
+				@Override
+				public int compare(NotifItem lhs, NotifItem rhs) {
+					int id1 = lhs.getId();
+					int id2 = rhs.getId();
+					return id1 < id2 ? 1 : id1 == id2 ? 0 : -1;
+				}
+			});
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside sortNotifList :: " + e.getMessage());
+		}
 	}
 
 	public boolean doesNotifListContain(NotifItem notifItem) {
-		for (NotifItem ni : notifList) {
-			if (ni.getId() == notifItem.getId())
-				return true;
+		try {
+			for (NotifItem ni : notifList) {
+				if (ni.getId() == notifItem.getId())
+					return true;
+			}
+			return false;
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Exception inside doesNotifListContain with notif: " + notifItem.getDescription() + "\n"
+							+ e.getMessage());
+			return false;
 		}
-		return false;
 	}
 
 	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
@@ -613,35 +678,43 @@ public class SystemNotificationFragment extends Fragment {
 	}
 
 	void alert(String message) {
-		AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
-		bld.setMessage(message);
-		bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				isADialogOnScreen = false;
-				dialog.dismiss();
-			}
-		});
-		bld.create().show();
-		isADialogOnScreen = true;
+		try {
+			AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
+			bld.setMessage(message);
+			bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					isADialogOnScreen = false;
+					dialog.dismiss();
+				}
+			});
+			bld.create().show();
+			isADialogOnScreen = true;
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside alert with message: " + message + "\n" + e.getMessage());
+		}
 	}
 
 	private static void vibratePhone() {
-		// Start the vibration
-		// start vibration with repeated count, use -1 if you don't want to
-		// repeat the vibration
-		if (vibrator != null) {
-			vibrator.cancel();
-			vibrator.vibrate(pattern, 0);
+		try {
+			// Start the vibration
+			// start vibration with repeated count, use -1 if you don't want to
+			// repeat the vibration
+			if (vibrator != null) {
+				vibrator.cancel();
+				vibrator.vibrate(pattern, 0);
+			}
+			// else if (tContext != null) {
+			// vibrator = (Vibrator)
+			// tContext.getSystemService(Context.VIBRATOR_SERVICE);
+			// long pattern2[] = { 0, 600, 50, 800, 5 * 1000 };
+			// vibrator.vibrate(pattern2, 0);
+			// }
+			// ((Vibrator)
+			// tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside vibratePhone :: " + e.getMessage());
 		}
-		// else if (tContext != null) {
-		// vibrator = (Vibrator)
-		// tContext.getSystemService(Context.VIBRATOR_SERVICE);
-		// long pattern2[] = { 0, 600, 50, 800, 5 * 1000 };
-		// vibrator.vibrate(pattern2, 0);
-		// }
-		// ((Vibrator)
-		// tContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(512);
 	}
 
 	@Override
@@ -653,10 +726,14 @@ public class SystemNotificationFragment extends Fragment {
 
 	@Override
 	public void onResume() {
-		refreshCounter = 0;
-		noMoreData = false;
-		Log.i(TAG, "onResume : cancelling vibrator ...");
-		vibrator.cancel();
+		try {
+			refreshCounter = 0;
+			noMoreData = false;
+			Log.i(TAG, "onResume : cancelling vibrator ...");
+			vibrator.cancel();
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside onResume : " + e.getMessage());
+		}
 		super.onResume();
 	}
 
