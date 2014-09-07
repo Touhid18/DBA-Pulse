@@ -14,7 +14,7 @@ import com.dbaservicesptyltd.dbaservices.model.UserCred;
  * Singleton class to return the application, which handles the preference
  * values
  */
-public class DBAServiceApplication extends Application{
+public class DBAServiceApplication extends Application {
 
 	private static Context mContext;
 	protected static SharedPreferences prefs;
@@ -24,6 +24,7 @@ public class DBAServiceApplication extends Application{
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		BugSenseHandler.initAndStartSession(mContext, "5cd599a4");
 	}
+
 	public DBAServiceApplication() {
 		DBAServiceApplication.mContext = getApplicationContext();
 		prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -37,8 +38,8 @@ public class DBAServiceApplication extends Application{
 	// }
 
 	public Context getAppContext() {
-		if(mContext==null)
-			mContext= getApplicationContext();
+		if (mContext == null)
+			mContext = getApplicationContext();
 		return mContext;
 	}
 

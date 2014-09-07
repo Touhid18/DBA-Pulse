@@ -77,7 +77,7 @@ public class SystemNotificationFragment extends Fragment {
 	private NotifAdapter notifAdapter;
 
 	private int refreshCounter = 0;
-	private boolean noMoreData = false;
+	// private boolean noMoreData = false;
 
 	private ImageView ivRefresh;
 	private boolean isNewRefresh = true;
@@ -92,6 +92,10 @@ public class SystemNotificationFragment extends Fragment {
 	private JsonParser jsonParser;
 
 	private boolean isADialogOnScreen = false;
+
+	public static SystemNotificationFragment newInstance(Context context) {
+		return new SystemNotificationFragment(context);
+	}
 
 	public SystemNotificationFragment(Context context) {
 		tContext = context;
@@ -148,12 +152,15 @@ public class SystemNotificationFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Log.d(TAG, "Load more clicked");
-				if (noMoreData)
-					alert("No more data!");
-				else {
-					refreshCounter++;
-					new GetNotifications().execute();
-				}
+				refreshCounter++;
+				new GetNotifications().execute();
+				// if (noMoreData) {
+				// // alert("No more data!");
+				// Log.d(TAG, "No more data!");
+				// } else {
+				// refreshCounter++;
+				// new GetNotifications().execute();
+				// }
 			}
 		});
 		lvNotifs.addFooterView(btnLvFooter);
@@ -165,7 +172,7 @@ public class SystemNotificationFragment extends Fragment {
 		if (isVisibleToUser && !isAsyncTaskRunning) {
 			isNewRefresh = true;
 			refreshCounter = 0;
-			noMoreData = false;
+			// noMoreData = false;
 			new GetNotifications().execute();
 		}
 	}
@@ -194,7 +201,7 @@ public class SystemNotificationFragment extends Fragment {
 									if (dialog.isShowing())
 										dialog.cancel();
 									if (!isAsyncTaskRunning) {
-										noMoreData = false;
+										// noMoreData = false;
 										refreshCounter = 0;
 										new GetNotifications().execute();
 									}
@@ -337,7 +344,7 @@ public class SystemNotificationFragment extends Fragment {
 						dialog.cancel();
 						if (!isAsyncTaskRunning) {
 							new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-							noMoreData = false;
+							// noMoreData = false;
 							refreshCounter = 0;
 							new GetNotifications().execute();
 						}
@@ -356,7 +363,7 @@ public class SystemNotificationFragment extends Fragment {
 						dialog.cancel();
 						if (!isAsyncTaskRunning) {
 							new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
-							noMoreData = false;
+							// noMoreData = false;
 							refreshCounter = 0;
 							new GetNotifications().execute();
 						}
@@ -438,7 +445,7 @@ public class SystemNotificationFragment extends Fragment {
 					ivRefresh.startAnimation(rotation);
 					if (!isAsyncTaskRunning) {
 						isNewRefresh = false;
-						noMoreData = false;
+						// noMoreData = false;
 						refreshCounter = 0;
 						new GetNotifications().execute();
 					}
@@ -528,8 +535,11 @@ public class SystemNotificationFragment extends Fragment {
 						Log.e("???????", "notifications count = " + notifList2.size());
 						// Decide on adding new data to the list
 						if (notifList2.size() == 0) {
-							noMoreData = true;
-							alert("No more data!");
+							ivRefresh.clearAnimation();
+							// noMoreData = true;
+							// TODO
+							// alert("No more data!");
+							Log.d(TAG, "No more data!");
 							if (pDialog.isShowing())
 								pDialog.cancel();
 							return;
@@ -541,9 +551,9 @@ public class SystemNotificationFragment extends Fragment {
 							notifAdapter.addData(notifList2);
 						}
 						if (notifList2.size() < 20)
-							noMoreData = true;
-						// Notif. list decided, now reload if new found
-						sortNotifList();
+							// noMoreData = true;
+							// Notif. list decided, now reload if new found
+							sortNotifList();
 						notifAdapter.notifyDataSetChanged();
 						ivRefresh.clearAnimation();
 						checkAndShowUnassignedalert();
@@ -558,14 +568,16 @@ public class SystemNotificationFragment extends Fragment {
 			} else {
 				if (pDialog.isShowing())
 					pDialog.dismiss();
-				noMoreData = false;
+				// noMoreData = false;
 				refreshCounter = 0;
 				new GetNotifications().execute();
+				ivRefresh.clearAnimation();
 				return;
 			}
 
 			if (pDialog.isShowing())
 				pDialog.dismiss();
+			ivRefresh.clearAnimation();
 			isAsyncTaskRunning = false;
 		}
 	}
@@ -608,16 +620,20 @@ public class SystemNotificationFragment extends Fragment {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			isAsyncTaskRunning = true;
-			if (vibrator != null)
-				vibrator.cancel();
-			if (!pDialog.isShowing()) {
-				pDialog.setMessage("Deciding the issue ...");
-				pDialog.setCancelable(false);
-				pDialog.setIndeterminate(true);
-				// pDialog.show();
-				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
-				rotation.setRepeatCount(Animation.INFINITE);
-				ivRefresh.startAnimation(rotation);
+			try {
+				if (vibrator != null)
+					vibrator.cancel();
+				if (!pDialog.isShowing()) {
+					pDialog.setMessage("Deciding the issue ...");
+					pDialog.setCancelable(false);
+					pDialog.setIndeterminate(true);
+					// pDialog.show();
+					final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+					rotation.setRepeatCount(Animation.INFINITE);
+					ivRefresh.startAnimation(rotation);
+				}
+			} catch (Exception e) {
+				Log.e(TAG, "Exception inside DecideNotification:onPreExecute :: \n" + e.getMessage());
 			}
 		}
 
@@ -652,17 +668,16 @@ public class SystemNotificationFragment extends Fragment {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						// if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
-						// alert("Issue marked as actioned.");
-						// else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
-						// alert("Issue marked as resolved.");
-						// else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
-						// alert("Issue marked as ignored. This will again be prompted within 7 minutes");
 						ivRefresh.clearAnimation();
-						notifAdapter.notifyDataSetChanged();
+						if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
+							alert("Issue marked as actioned.");
+						else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
+							alert("Issue marked as resolved.");
+						else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
+							alert("Issue marked as ignored. This will again be prompted within 7 minutes");
 					} else {
-						alert("Invalid token.");
 						ivRefresh.clearAnimation();
+						alert("Invalid token.");
 					}
 				} catch (JSONException e) {
 					alert("Malformed data received!");
@@ -670,11 +685,11 @@ public class SystemNotificationFragment extends Fragment {
 				}
 			}
 
+			ivRefresh.clearAnimation();
 			if (pDialog.isShowing())
 				pDialog.dismiss();
 			isAsyncTaskRunning = false;
 		}
-
 	}
 
 	void alert(String message) {
@@ -720,7 +735,7 @@ public class SystemNotificationFragment extends Fragment {
 	@Override
 	public void onPause() {
 		refreshCounter = 0;
-		noMoreData = false;
+		// noMoreData = false;
 		super.onPause();
 	}
 
@@ -728,7 +743,7 @@ public class SystemNotificationFragment extends Fragment {
 	public void onResume() {
 		try {
 			refreshCounter = 0;
-			noMoreData = false;
+			// noMoreData = false;
 			Log.i(TAG, "onResume : cancelling vibrator ...");
 			vibrator.cancel();
 		} catch (Exception e) {

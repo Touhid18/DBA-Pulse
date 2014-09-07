@@ -49,23 +49,19 @@ public class OnlineAdminFragment extends Fragment {
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	// public static Fragment newInstance(Context context, AdminClickListener
-	// adminClickListener) {
-	// tContext = context;
-	// OnlineAdminFragment.adminClickListener = adminClickListener;
-	// return new OnlineAdminFragment();
-	// }
+	public static Fragment newInstance(Context context, AdminClickListener adminClickListener) {
+		return new OnlineAdminFragment(context, adminClickListener);
+	}
+
 	public OnlineAdminFragment(Context context, AdminClickListener adminClickListener) {
 		tContext = context;
 		this.adminClickListener = adminClickListener;
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "inside OncreateView()");
-		ViewGroup rootView = (ViewGroup) inflater.inflate(
-				R.layout.online_admin, container, false);
+		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.online_admin, container, false);
 
 		pDialog = new ProgressDialog(tContext);
 		jsonParser = new JsonParser();
@@ -74,8 +70,7 @@ public class OnlineAdminFragment extends Fragment {
 		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_admins);
 
 		adminList = new ArrayList<OnlineAdminRow>();
-		onlineAdminAdapter = new OnlineAdminAdapter(tContext,
-				R.layout.online_admin_row, adminList);
+		onlineAdminAdapter = new OnlineAdminAdapter(tContext, R.layout.online_admin_row, adminList);
 		lvNotifs.setAdapter(onlineAdminAdapter);
 		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -104,9 +99,14 @@ public class OnlineAdminFragment extends Fragment {
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
-		isNewRefresh = true;
-		if (isVisibleToUser)
-			new GetOnlineAdmins().execute();
+		try {
+			isNewRefresh = true;
+			if (isVisibleToUser)
+				new GetOnlineAdmins().execute();
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Exception in setUserVisibleHint as isVisibleToUser=" + isVisibleToUser + " ::\n" + e.getMessage());
+		}
 	}
 
 	// @Override
@@ -116,19 +116,22 @@ public class OnlineAdminFragment extends Fragment {
 	// }
 
 	private void setRefreshAction(ViewGroup rootView) {
-		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_admin);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext,
-				R.anim.rotate_refresh);
-		rotation.setRepeatCount(Animation.INFINITE);
-		ivRefresh.startAnimation(rotation);
-		ivRefresh.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ivRefresh.startAnimation(rotation);
-				isNewRefresh = false;
-				new GetOnlineAdmins().execute();
-			}
-		});
+		try {
+			ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_admin);
+			final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+			rotation.setRepeatCount(Animation.INFINITE);
+			ivRefresh.startAnimation(rotation);
+			ivRefresh.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					ivRefresh.startAnimation(rotation);
+					isNewRefresh = false;
+					new GetOnlineAdmins().execute();
+				}
+			});
+		} catch (Exception e) {
+			Log.e(TAG, "Exception in setRefreshAction : " + e.getMessage());
+		}
 	}
 
 	private class GetOnlineAdmins extends AsyncTask<Void, Void, JSONObject> {
@@ -136,14 +139,18 @@ public class OnlineAdminFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
-				pDialog.setMessage("Refreshing admin list ...");
-				pDialog.setCancelable(false);
-				pDialog.setIndeterminate(true);
-				// pDialog.show();
-				final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
-				rotation.setRepeatCount(Animation.INFINITE);
-				ivRefresh.startAnimation(rotation);
+			try {
+				if (pDialog != null && !pDialog.isShowing() && isNewRefresh) {
+					pDialog.setMessage("Refreshing admin list ...");
+					pDialog.setCancelable(false);
+					pDialog.setIndeterminate(true);
+					// pDialog.show();
+					final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+					rotation.setRepeatCount(Animation.INFINITE);
+					ivRefresh.startAnimation(rotation);
+				}
+			} catch (Exception e) {
+				Log.e(TAG, "Exception in GetOnlineAdmins:onPreExecute :: " + e.getMessage());
 			}
 		}
 
@@ -152,8 +159,7 @@ public class OnlineAdminFragment extends Fragment {
 			String url = Constants.URL_PARENT + "online_admin";
 
 			try {
-				ServerResponse response = jsonParser.retrieveServerData(
-						Constants.REQUEST_TYPE_GET, url, null, null,
+				ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
 						DBAServiceApplication.getAppAccessToken(tContext));
 				if (response.getStatus() == 200) {
 					Log.d(">>>><<<<", "success in retrieving admin list.");
@@ -162,8 +168,7 @@ public class OnlineAdminFragment extends Fragment {
 				} else
 					return null;
 			} catch (Exception e) {
-				Log.e("JSONParser",
-						"Exception in retrieveServerData" + e.toString());
+				Log.e("JSONParser", "Exception in retrieveServerData" + e.toString());
 			}
 			return null;
 		}
@@ -175,8 +180,7 @@ public class OnlineAdminFragment extends Fragment {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						JSONArray adminArray = responseObj
-								.getJSONArray("active_users");
+						JSONArray adminArray = responseObj.getJSONArray("active_users");
 						adminList = OnlineAdminRow.parseAdminList(adminArray);
 						Log.e("???????", "admin count = " + adminList.size());
 
@@ -199,16 +203,20 @@ public class OnlineAdminFragment extends Fragment {
 	}
 
 	void alert(String message) {
-		AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
-		bld.setMessage(message);
-		bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+		try {
+			AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
+			bld.setMessage(message);
+			bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		bld.create().show();
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+			bld.create().show();
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside alert() with message : " + message + "\n" + e.getMessage());
+		}
 	}
 
 }

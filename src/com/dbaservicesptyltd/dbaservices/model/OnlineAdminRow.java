@@ -17,19 +17,18 @@ import com.google.gson.GsonBuilder;
  * @author Touhid
  * 
  */
-public class OnlineAdminRow implements Serializable{
+public class OnlineAdminRow implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6619605883103797703L;
-	
+
 	private String name;
 	private int user_id, actioned, ignored, resolved;
 	private boolean is_online;
 
-	public OnlineAdminRow(String adminName, int uId, int active, int pending,
-			int resolved, boolean isOnLine) {
+	public OnlineAdminRow(String adminName, int uId, int active, int pending, int resolved, boolean isOnLine) {
 		this.name = adminName;
 		this.user_id = uId;
 		this.actioned = active;
@@ -38,11 +37,15 @@ public class OnlineAdminRow implements Serializable{
 		this.is_online = isOnLine;
 	}
 
+	/**
+	 * "Name: " + name + ", user_id=" + user_id + ", actioned=" + actioned +
+	 * ", ignored=" + ignored + ", resolved=" + resolved + ", is_online:" +
+	 * is_online;
+	 */
 	@Override
 	public String toString() {
-		return "Name: " + name + ", user_id=" + user_id + ", actioned="
-				+ actioned + ", ignored=" + ignored + ", resolved=" + resolved
-				+ ", is_online:" + is_online;
+		return "Name: " + name + ", user_id=" + user_id + ", actioned=" + actioned + ", ignored=" + ignored
+				+ ", resolved=" + resolved + ", is_online:" + is_online;
 	}
 
 	/**
@@ -152,8 +155,7 @@ public class OnlineAdminRow implements Serializable{
 				JSONObject thisAdmin = adminArray.getJSONObject(i);
 				if (thisAdmin != null) {
 					String jsonString = thisAdmin.toString();
-					OnlineAdminRow admin = gson.fromJson(jsonString,
-							OnlineAdminRow.class);
+					OnlineAdminRow admin = gson.fromJson(jsonString, OnlineAdminRow.class);
 					// Log.d("parseAdminList",admin.toString());
 					adminList.add(admin);
 				}

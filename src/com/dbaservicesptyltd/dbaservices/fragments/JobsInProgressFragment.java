@@ -69,13 +69,13 @@ public class JobsInProgressFragment extends Fragment {
 
 	private JobsInProgressFragment(Context context, OnlineAdminRow admin, AdminClickListener adminClicker) {
 		Log.d(TAG, "New admin: " + admin.getAdminName());
-		tContext = context;
-		JobsInProgressFragment.adminObj = admin;
-		// adminClickListener = adminClicker;
-		// Log.i(TAG, "New admin: " + adminObj.getAdminName());
-		Bundle b = new Bundle();
-		b.putSerializable("admin", admin);
 		try {
+			tContext = context;
+			JobsInProgressFragment.adminObj = admin;
+			// adminClickListener = adminClicker;
+			// Log.i(TAG, "New admin: " + adminObj.getAdminName());
+			Bundle b = new Bundle();
+			b.putSerializable("admin", admin);
 			setArguments(b);
 		} catch (Exception e) {
 			this.getArguments().putSerializable("admin", admin);
@@ -100,29 +100,33 @@ public class JobsInProgressFragment extends Fragment {
 		Log.d(TAG, "inside onCreateView()");
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.jobs_progress, container, false);
 		// formAdminObj();
-		OnlineAdminRow adminObj = (OnlineAdminRow) this.getArguments().getSerializable("admin");
-		if (adminObj == null) {
-			adminObj = requestNewAdmin();
-		}
-		setAdminViews(rootView, adminObj);
-
-		pDialog = new ProgressDialog(tContext);
-		jsonParser = new JsonParser();
-
-		setRefreshAction(rootView);
-		ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_jobs);
-
-		jobsList = new ArrayList<NotifItem>();
-		jobsAdapter = new NotifAdapter(tContext, R.layout.notif_row, jobsList);
-		lvNotifs.setAdapter(jobsAdapter);
-		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				showActionDialog((NotifItem) parent.getItemAtPosition(position));
+		try {
+			OnlineAdminRow adminObj = (OnlineAdminRow) this.getArguments().getSerializable("admin");
+			if (adminObj == null) {
+				adminObj = requestNewAdmin();
 			}
-		});
-		new GetAdminJobs().execute();
-		getTag();
+			setAdminViews(rootView, adminObj);
+
+			pDialog = new ProgressDialog(tContext);
+			jsonParser = new JsonParser();
+
+			setRefreshAction(rootView);
+			ListView lvNotifs = (ListView) rootView.findViewById(R.id.lv_jobs);
+
+			jobsList = new ArrayList<NotifItem>();
+			jobsAdapter = new NotifAdapter(tContext, R.layout.notif_row, jobsList);
+			lvNotifs.setAdapter(jobsAdapter);
+			lvNotifs.setOnItemClickListener(new OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+					showActionDialog((NotifItem) parent.getItemAtPosition(position));
+				}
+			});
+			new GetAdminJobs().execute();
+			getTag();
+		} catch (Exception e) {
+			Log.e(TAG, "Exception in onCreateView :: \n" + e.getMessage());
+		}
 		return rootView;
 	}
 
@@ -136,26 +140,34 @@ public class JobsInProgressFragment extends Fragment {
 		// super.setUserVisibleHint(isVisibleToUser);
 		// isNewRefresh = true;
 		// if (!isVisibleToUser)
-		// adminClickListener.handleClick(false, adminObj); //TODO remove this
+		// adminClickListener.handleClick(false, adminObj); //TO_DO remove this
 		// page by interface calling
 	}
 
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		Log.e(TAG, "onDestroyView: nullifying admin in arguments");
-		this.getArguments().putSerializable("admin", null);
+		try {
+			Log.e(TAG, "onDestroyView: nullifying admin in arguments");
+			this.getArguments().putSerializable("admin", null);
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside onDestroyView ::\n" + e.getMessage());
+		}
 	}
 
 	private void setAdminViews(ViewGroup rootView, OnlineAdminRow adminObj) {
-		ImageView ivStatus = (ImageView) rootView.findViewById(R.id.iv_status);
-		Log.e(TAG, "setAdminViews : " + adminObj.getAdminName());
-		if (adminObj != null && adminObj.isOnline())
-			ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
-		((TextView) rootView.findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
-		((TextView) rootView.findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
-		((TextView) rootView.findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
-		((TextView) rootView.findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
+		try {
+			ImageView ivStatus = (ImageView) rootView.findViewById(R.id.iv_status);
+			Log.e(TAG, "setAdminViews : " + adminObj.getAdminName());
+			if (adminObj != null && adminObj.isOnline())
+				ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
+			((TextView) rootView.findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
+			((TextView) rootView.findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
+			((TextView) rootView.findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
+			((TextView) rootView.findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside setAdminViews with admin=" + adminObj.toString() + " ::\n" + e.getMessage());
+		}
 	}
 
 	// private void formAdminObj() {
@@ -178,57 +190,67 @@ public class JobsInProgressFragment extends Fragment {
 	// }
 
 	private void setRefreshAction(ViewGroup rootView) {
-		ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_jobs);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
-		rotation.setRepeatCount(Animation.INFINITE);
-		ivRefresh.startAnimation(rotation);
-		ivRefresh.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ivRefresh.startAnimation(rotation);
-				isNewRefresh = true;
-				new GetAdminJobs().execute();
-			}
-		});
+		try {
+			ivRefresh = (ImageView) rootView.findViewById(R.id.iv_refresh_jobs);
+			final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
+			rotation.setRepeatCount(Animation.INFINITE);
+			ivRefresh.startAnimation(rotation);
+			ivRefresh.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					ivRefresh.startAnimation(rotation);
+					isNewRefresh = true;
+					new GetAdminJobs().execute();
+				}
+			});
+		} catch (Exception e) {
+			Log.e(TAG, "Exception inside setRefreshAction :: \n" + e.getMessage());
+		}
 	}
 
 	private void showActionDialog(final NotifItem notifItem) {
-		final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-		dialog.setContentView(R.layout.action_dialog);
-		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.cancel();
-				new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
-				new GetAdminJobs().execute();
-			}
-		});
-		dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
-		dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.cancel();
-				new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
-				new GetAdminJobs().execute();
-			}
-		});
-		String head = "";
-		if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
-			head = "CRITICAL ALERT RECEIVED";
-		else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
-			head = "WARNING RECEIVED";
-		else
-			head = "Notification Received";
-		TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
-		tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
-		TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
-		tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
-				+ ", " + notifItem.getUpdated());
-		// Center-focus the dialog
-		Window window = dialog.getWindow();
-		window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		window.setGravity(Gravity.CENTER);
-		dialog.show();
+		try {
+			final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+			dialog.setContentView(R.layout.action_dialog);
+			dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.cancel();
+					new DecideNotification().execute(Constants.NOTIF_TYPE_ACTIONED, notifItem.getId());
+					new GetAdminJobs().execute();
+				}
+			});
+			dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
+			dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.cancel();
+					new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+					new GetAdminJobs().execute();
+				}
+			});
+			String head = "";
+			if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
+				head = "CRITICAL ALERT RECEIVED";
+			else if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_WARNING)
+				head = "WARNING RECEIVED";
+			else
+				head = "Notification Received";
+			TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
+			tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
+			TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
+			tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", "
+					+ notifItem.getClientName() + ", " + notifItem.getUpdated());
+			// Center-focus the dialog
+			Window window = dialog.getWindow();
+			window.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			window.setGravity(Gravity.CENTER);
+			dialog.show();
+		} catch (Exception e) {
+			Log.e(TAG,
+					"Exception inside showActionDialog with notif=" + notifItem.getDescription() + " :: \n"
+							+ e.getMessage());
+		}
 	}
 
 	private class GetAdminJobs extends AsyncTask<Void, Void, JSONObject> {
@@ -380,14 +402,18 @@ public class JobsInProgressFragment extends Fragment {
 	}
 
 	private void sortJobsList() {
-		Collections.sort(jobsList, new Comparator<NotifItem>() {
-			@Override
-			public int compare(NotifItem lhs, NotifItem rhs) {
-				int id1 = lhs.getId();
-				int id2 = rhs.getId();
-				return id1 < id2 ? 1 : id1 == id2 ? 0 : -1;
-			}
-		});
+		try {
+			Collections.sort(jobsList, new Comparator<NotifItem>() {
+				@Override
+				public int compare(NotifItem lhs, NotifItem rhs) {
+					int id1 = lhs.getId();
+					int id2 = rhs.getId();
+					return id1 < id2 ? 1 : id1 == id2 ? 0 : -1;
+				}
+			});
+		} catch (Exception e) {
+			Log.e(TAG, "Exception in sortJobsList ::\n" + e.getMessage());
+		}
 	}
 
 }
