@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -49,14 +50,22 @@ public class OnlineAdminFragment extends Fragment {
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	public static Fragment newInstance(Context context, AdminClickListener adminClickListener) {
-		return new OnlineAdminFragment(context, adminClickListener);
+	public static OnlineAdminFragment newInstance() {
+		return new OnlineAdminFragment();
 	}
 
-	public OnlineAdminFragment(Context context, AdminClickListener adminClickListener) {
-		tContext = context;
-		this.adminClickListener = adminClickListener;
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		tContext = activity;
+		adminClickListener = (AdminClickListener) activity;
 	}
+
+	// public OnlineAdminFragment(Context context, AdminClickListener
+	// adminClickListener) {
+	// tContext = context;
+	// this.adminClickListener = adminClickListener;
+	// }
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

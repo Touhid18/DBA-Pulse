@@ -11,7 +11,7 @@ import com.dbaservicesptyltd.dbaservices.fragments.SystemNotificationFragment;
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 	// implements OnPageChangeListener {
 
-	private static Context tContext;
+	// private static Context tContext;
 	private static int NUM_PAGES = 2;
 
 	// private OnlineAdminRow admin;
@@ -21,7 +21,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 	public ViewPagerAdapter(Context context, FragmentManager fm) {
 		// , AdminClickListener adminClickListener) {
 		super(fm);
-		tContext = context;
+		// tContext = context;
 		// this.adminClickListener = adminClickListener;
 	}
 
@@ -33,11 +33,11 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 	@Override
 	public Fragment getItem(int pageId) {
 		if (pageId == 0)
-			return new SystemNotificationFragment();
+			return SystemNotificationFragment.newInstance();
 		else
 			// if (pageId == 1)
-			return new OnlineAdminFragment(tContext, null);// TODO remove null ,
-															// adminClickListener);
+			return OnlineAdminFragment.newInstance();// TODO remove null ,
+														// adminClickListener);
 		// else if (NUM_PAGES > 2 && pageId == 2)
 		// return new JobsInProgressFragment(tContext, admin,
 		// adminClickListener);// TODO
