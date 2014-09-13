@@ -33,7 +33,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 	@Override
 	public Fragment getItem(int pageId) {
 		if (pageId == 0)
-			return new SystemNotificationFragment(tContext);
+			return new SystemNotificationFragment();
 		else
 			// if (pageId == 1)
 			return new OnlineAdminFragment(tContext, null);// TODO remove null ,

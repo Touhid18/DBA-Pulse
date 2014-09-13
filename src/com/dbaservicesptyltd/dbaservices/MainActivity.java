@@ -34,7 +34,7 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 		// getSupportFragmentManager());
 
 		ArrayList<Fragment> fragList = new ArrayList<>();
-		fragList.add(SystemNotificationFragment.newInstance(MainActivity.this));
+		fragList.add(SystemNotificationFragment.newInstance());
 		fragList.add(OnlineAdminFragment.newInstance(MainActivity.this, this));
 		dvpAdapter = new DynamicViewPagerAdapter(MainActivity.this, getSupportFragmentManager(), fragList);
 		pager.setAdapter(dvpAdapter);

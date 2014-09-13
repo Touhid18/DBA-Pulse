@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -93,17 +94,23 @@ public class SystemNotificationFragment extends Fragment {
 
 	private boolean isADialogOnScreen = false;
 
-	public static SystemNotificationFragment newInstance(Context context) {
-		return new SystemNotificationFragment(context);
+	public static SystemNotificationFragment newInstance() {
+		return new SystemNotificationFragment();
 	}
 
-	public SystemNotificationFragment(Context context) {
-		tContext = context;
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		tContext = activity;
 	}
 
-	public SystemNotificationFragment() {
-		tContext = (Context) getActivity();
-	}
+	// public SystemNotificationFragment(Context context) {
+	// tContext = context;
+	// }
+
+	// public SystemNotificationFragment() {
+	// tContext = (Context) getActivity();
+	// }
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
