@@ -47,7 +47,7 @@ public class MainActivity extends FragmentActivity implements AdminClickListener
 	public void handleClick(boolean isAdd, OnlineAdminRow admin) {
 		Log.d(TAG, "handleClick: " + isAdd + ", admin name=" + admin.getAdminName());
 		if (isAdd) {
-			dvpAdapter.addJobsPage(JobsInProgressFragment.newInstance(MainActivity.this, admin, this));
+			dvpAdapter.addJobsPage(JobsInProgressFragment.newInstance(admin));
 			pager.setCurrentItem(2);
 		} else {
 			dvpAdapter.removeJobsPage(pager);

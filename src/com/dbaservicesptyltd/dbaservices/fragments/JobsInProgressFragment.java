@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -39,7 +40,6 @@ import android.widget.TextView;
 
 import com.dbaservicesptyltd.dbaservices.R;
 import com.dbaservicesptyltd.dbaservices.adapter.NotifAdapter;
-import com.dbaservicesptyltd.dbaservices.interfaces.AdminClickListener;
 import com.dbaservicesptyltd.dbaservices.model.NotifItem;
 import com.dbaservicesptyltd.dbaservices.model.OnlineAdminRow;
 import com.dbaservicesptyltd.dbaservices.model.ServerResponse;
@@ -67,32 +67,39 @@ public class JobsInProgressFragment extends Fragment {
 	private ProgressDialog pDialog;
 	private JsonParser jsonParser;
 
-	private JobsInProgressFragment(Context context, OnlineAdminRow admin, AdminClickListener adminClicker) {
-		Log.d(TAG, "New admin: " + admin.getAdminName());
-		try {
-			tContext = context;
-			JobsInProgressFragment.adminObj = admin;
-			// adminClickListener = adminClicker;
-			// Log.i(TAG, "New admin: " + adminObj.getAdminName());
-			Bundle b = new Bundle();
-			b.putSerializable("admin", admin);
-			setArguments(b);
-		} catch (Exception e) {
-			this.getArguments().putSerializable("admin", admin);
-		}
-	}
+	// private JobsInProgressFragment(Context context, OnlineAdminRow admin,
+	// AdminClickListener adminClicker) {
+	// Log.d(TAG, "New admin: " + admin.getAdminName());
+	// try {
+	// tContext = context;
+	// JobsInProgressFragment.adminObj = admin;
+	// // adminClickListener = adminClicker;
+	// // Log.i(TAG, "New admin: " + adminObj.getAdminName());
+	// // Bundle b = new Bundle();
+	// // b.putSerializable("admin", admin);
+	// // setArguments(b);
+	// } catch (Exception e) {
+	// this.().putSerializable("admin", admin);
+	// }
+	// }
 
-	public static JobsInProgressFragment newInstance(Context context, OnlineAdminRow admin,
-			AdminClickListener adminClicker) {
-		JobsInProgressFragment jobs = new JobsInProgressFragment(context, admin, adminClicker);
+	public static JobsInProgressFragment newInstance(OnlineAdminRow admin) {
+		JobsInProgressFragment jobs = new JobsInProgressFragment();
 
 		// Bundle b = new Bundle();
 		// b.putSerializable("admin", admin);
 		// jobs.setArguments(b);
 
 		Log.d(TAG, admin.toString());
+		adminObj = admin;
 
 		return jobs;
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		tContext = activity;
 	}
 
 	@Override
@@ -101,7 +108,7 @@ public class JobsInProgressFragment extends Fragment {
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.jobs_progress, container, false);
 		// formAdminObj();
 		try {
-			OnlineAdminRow adminObj = (OnlineAdminRow) this.getArguments().getSerializable("admin");
+			OnlineAdminRow adminObj = JobsInProgressFragment.adminObj;
 			if (adminObj == null) {
 				adminObj = requestNewAdmin();
 			}
@@ -149,7 +156,7 @@ public class JobsInProgressFragment extends Fragment {
 		super.onDestroyView();
 		try {
 			Log.e(TAG, "onDestroyView: nullifying admin in arguments");
-			this.getArguments().putSerializable("admin", null);
+			// this.().putSerializable("admin", null);
 		} catch (Exception e) {
 			Log.e(TAG, "Exception inside onDestroyView ::\n" + e.getMessage());
 		}
@@ -271,7 +278,7 @@ public class JobsInProgressFragment extends Fragment {
 
 		@Override
 		protected JSONObject doInBackground(Void... params) {
-			OnlineAdminRow admin = ((OnlineAdminRow) getArguments().getSerializable("admin"));
+			OnlineAdminRow admin = adminObj;
 			if (admin == null)
 				admin = requestNewAdmin();
 			int userId = admin.getUserId();
