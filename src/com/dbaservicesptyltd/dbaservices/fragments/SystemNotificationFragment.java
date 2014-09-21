@@ -542,7 +542,7 @@ public class SystemNotificationFragment extends Fragment {
 						if (notifList2.size() == 0) {
 							ivRefresh.clearAnimation();
 							// noMoreData = true;
-							// TO_DO
+							// TODO
 							// alert("No more data!");
 							Log.d(TAG, "No more data!");
 							if (pDialog.isShowing())
