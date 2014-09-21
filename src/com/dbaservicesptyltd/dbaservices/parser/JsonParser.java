@@ -19,6 +19,9 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +61,9 @@ public class JsonParser {
 
 		// Making HTTP request
 		try {
+			HttpParams httpParameters = new BasicHttpParams();
+			HttpConnectionParams.setConnectionTimeout(httpParameters, 30 * 1000);
+			HttpConnectionParams.setSoTimeout(httpParameters, 40 * 1000);
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpResponse httpResponse = null;
 
