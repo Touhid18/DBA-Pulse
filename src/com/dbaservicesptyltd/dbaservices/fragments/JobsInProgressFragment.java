@@ -12,11 +12,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -310,10 +308,10 @@ public class JobsInProgressFragment extends Fragment {
 						jobsAdapter.notifyDataSetChanged();
 						ivRefresh.clearAnimation();
 					} else {
-						alert("Invalid token!");
+						// alert("Invalid token!");
 					}
 				} catch (JSONException e) {
-					alert("Malformed data received!");
+					// alert("Malformed data received!");
 					e.printStackTrace();
 				}
 			}
@@ -372,19 +370,19 @@ public class JobsInProgressFragment extends Fragment {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
-							alert("Issue marked as actioned.");
-						else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
-							alert("Issue marked as resolved.");
-						else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
-							alert("Issue marked as ignored. This will again be prompted within 7 minutes");
+						// if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
+						// alert("Issue marked as actioned.");
+						// else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
+						// alert("Issue marked as resolved.");
+						// else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
+						// alert("Issue marked as ignored. This will again be prompted within 7 minutes");
 						ivRefresh.clearAnimation();
 					} else {
-						alert("Invalid token.");
+						// alert("Invalid token.");
 						ivRefresh.clearAnimation();
 					}
 				} catch (JSONException e) {
-					alert("Malformed data received!");
+					// alert("Malformed data received!");
 					e.printStackTrace();
 				}
 			}
@@ -395,17 +393,17 @@ public class JobsInProgressFragment extends Fragment {
 
 	}
 
-	void alert(String message) {
-		AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
-		bld.setMessage(message);
-		bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		bld.create().show();
-	}
+	// void alert(String message) {
+	// AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
+	// bld.setMessage(message);
+	// bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// dialog.dismiss();
+	// }
+	// });
+	// bld.create().show();
+	// }
 
 	private void sortJobsList() {
 		try {

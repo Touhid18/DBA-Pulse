@@ -9,11 +9,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -75,8 +73,7 @@ public class JobsInProgressActivity extends Activity {
 		lvNotifs.setAdapter(jobsAdapter);
 		lvNotifs.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				showActionDialog((NotifItem) parent.getItemAtPosition(position));
 			}
 		});
@@ -96,16 +93,11 @@ public class JobsInProgressActivity extends Activity {
 	private void setAdminViews() {
 		ImageView ivStatus = (ImageView) findViewById(R.id.iv_status);
 		if (adminObj.isOnline())
-			ivStatus.setImageBitmap(BitmapFactory.decodeResource(
-					tContext.getResources(), R.drawable.status_online));
-		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj
-				.getAdminName());
-		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj
-				.getActive() + "");
-		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj
-				.getPending() + "");
-		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj
-				.getResolved() + "");
+			ivStatus.setImageBitmap(BitmapFactory.decodeResource(tContext.getResources(), R.drawable.status_online));
+		((TextView) findViewById(R.id.tv_admin_name)).setText(adminObj.getAdminName());
+		((TextView) findViewById(R.id.tv_active_count)).setText(adminObj.getActive() + "");
+		((TextView) findViewById(R.id.tv_pending_count)).setText(adminObj.getPending() + "");
+		((TextView) findViewById(R.id.tv_resolved_count)).setText(adminObj.getResolved() + "");
 	}
 
 	private void formAdminObj() {
@@ -116,16 +108,14 @@ public class JobsInProgressActivity extends Activity {
 		int pending = intent.getIntExtra(Constants.U_PENDING_COUNT, 0);
 		int resolved = intent.getIntExtra(Constants.U_RESOLVED_COUNT, 0);
 		boolean isOnline = intent.getBooleanExtra(Constants.U_IS_ONLINE, false);
-		Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active
-				+ ", " + pending + ", " + resolved + ", " + isOnline);
-		adminObj = new OnlineAdminRow(adminName, userId, active, pending,
-				resolved, isOnline);
+		Log.d(TAG, "Admin values: " + adminName + ", " + userId + ", " + active + ", " + pending + ", " + resolved
+				+ ", " + isOnline);
+		adminObj = new OnlineAdminRow(adminName, userId, active, pending, resolved, isOnline);
 	}
 
 	private void setRefreshAction() {
 		ivRefresh = (ImageView) findViewById(R.id.iv_refresh_jobs);
-		final Animation rotation = AnimationUtils.loadAnimation(tContext,
-				R.anim.rotate_refresh);
+		final Animation rotation = AnimationUtils.loadAnimation(tContext, R.anim.rotate_refresh);
 		rotation.setRepeatCount(Animation.INFINITE);
 		ivRefresh.startAnimation(rotation);
 		ivRefresh.setOnClickListener(new OnClickListener() {
@@ -139,8 +129,7 @@ public class JobsInProgressActivity extends Activity {
 	}
 
 	private void showActionDialog(final NotifItem notifItem) {
-		final Dialog dialog = new Dialog(tContext,
-				android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+		final Dialog dialog = new Dialog(tContext, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
 		dialog.setContentView(R.layout.action_dialog);
 
 		dialog.findViewById(R.id.btn_action).setOnClickListener(new OnClickListener() {
@@ -152,17 +141,14 @@ public class JobsInProgressActivity extends Activity {
 			}
 		});
 		dialog.findViewById(R.id.btn_ignore).setVisibility(View.GONE);
-		dialog.findViewById(R.id.btn_resolved).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						dialog.cancel();
-						new DecideNotification().execute(
-								Constants.NOTIF_TYPE_RESOLVED,
-								notifItem.getId());
-						new GetAdminJobs().execute();
-					}
-				});
+		dialog.findViewById(R.id.btn_resolved).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.cancel();
+				new DecideNotification().execute(Constants.NOTIF_TYPE_RESOLVED, notifItem.getId());
+				new GetAdminJobs().execute();
+			}
+		});
 		String head = "";
 		if (notifItem.getSeverity() == Constants.NOTIF_SEVERITY_ALERT)
 			head = "CRITICAL ALERT RECEIVED";
@@ -173,8 +159,7 @@ public class JobsInProgressActivity extends Activity {
 		TextView tvHead = (TextView) dialog.findViewById(R.id.tv_dialog_head);
 		tvHead.setText(Html.fromHtml("<u>" + head + "</u>"));
 		TextView tvBody = (TextView) dialog.findViewById(R.id.tv_dialog_body);
-		tvBody.setText(notifItem.getDatetime() + " "
-				+ notifItem.getDescription() + ", " + notifItem.getClientName()
+		tvBody.setText(notifItem.getDatetime() + " " + notifItem.getDescription() + ", " + notifItem.getClientName()
 				+ ", " + notifItem.getUpdated());
 		// Center-focus the dialog
 		Window window = dialog.getWindow();
@@ -204,12 +189,10 @@ public class JobsInProgressActivity extends Activity {
 			int userId = adminObj.getUserId();
 			String url = Constants.URL_PARENT + "in_progress/" + userId;
 
-			ServerResponse response = jsonParser.retrieveServerData(
-					Constants.REQUEST_TYPE_GET, url, null, null,
+			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_GET, url, null, null,
 					DBAServiceApplication.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
-				Log.d(">>>><<<<",
-						"success in retrieving job list for user_id: " + userId);
+				Log.d(">>>><<<<", "success in retrieving job list for user_id: " + userId);
 				JSONObject responseObj = response.getjObj();
 				return responseObj;
 			} else
@@ -223,8 +206,7 @@ public class JobsInProgressActivity extends Activity {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						JSONArray jobsArray = responseObj
-								.getJSONArray("jobs_in_progress");
+						JSONArray jobsArray = responseObj.getJSONArray("jobs_in_progress");
 						jobsList = NotifItem.parseNotifList(jobsArray);
 						Log.e("???????", "jobs count = " + jobsList.size());
 						sortJobsList();
@@ -233,10 +215,10 @@ public class JobsInProgressActivity extends Activity {
 						jobsAdapter.notifyDataSetChanged();
 						ivRefresh.clearAnimation();
 					} else {
-						alert("Invalid token!");
+						// alert("Invalid token!");
 					}
 				} catch (JSONException e) {
-					alert("Malformed data received!");
+					// alert("Malformed data received!");
 					e.printStackTrace();
 				}
 			}
@@ -246,8 +228,7 @@ public class JobsInProgressActivity extends Activity {
 		}
 	}
 
-	private class DecideNotification extends
-			AsyncTask<Integer, Void, JSONObject> {
+	private class DecideNotification extends AsyncTask<Integer, Void, JSONObject> {
 
 		private int actionCode;
 
@@ -279,9 +260,8 @@ public class JobsInProgressActivity extends Activity {
 				e.printStackTrace();
 			}
 
-			ServerResponse response = jsonParser.retrieveServerData(
-					Constants.REQUEST_TYPE_POST, url, null, jObj.toString(),
-					DBAServiceApplication.getAppAccessToken(tContext));
+			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, url, null,
+					jObj.toString(), DBAServiceApplication.getAppAccessToken(tContext));
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "success in retrieving notifications.");
 				JSONObject responseObj = response.getjObj();
@@ -297,19 +277,19 @@ public class JobsInProgressActivity extends Activity {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
-							alert("Issue marked as actioned.");
-						else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
-							alert("Issue marked as resolved.");
-						else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
-							alert("Issue marked as ignored. This will again be prompted within 7 minutes");
+						// if (actionCode == Constants.NOTIF_TYPE_ACTIONED)
+						// alert("Issue marked as actioned.");
+						// else if (actionCode == Constants.NOTIF_TYPE_RESOLVED)
+						// alert("Issue marked as resolved.");
+						// else if (actionCode == Constants.NOTIF_TYPE_IGNORED)
+						// alert("Issue marked as ignored. This will again be prompted within 7 minutes");
 						ivRefresh.clearAnimation();
 					} else {
-						alert("Invalid token.");
+						// alert("Invalid token.");
 						ivRefresh.clearAnimation();
 					}
 				} catch (JSONException e) {
-					alert("Malformed data received!");
+					// alert("Malformed data received!");
 					e.printStackTrace();
 				}
 			}
@@ -320,17 +300,17 @@ public class JobsInProgressActivity extends Activity {
 
 	}
 
-	void alert(String message) {
-		AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
-		bld.setMessage(message);
-		bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		bld.create().show();
-	}
+	// void alert(String message) {
+	// AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
+	// bld.setMessage(message);
+	// bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// dialog.dismiss();
+	// }
+	// });
+	// bld.create().show();
+	// }
 
 	private void sortJobsList() {
 		Collections.sort(jobsList, new Comparator<NotifItem>() {

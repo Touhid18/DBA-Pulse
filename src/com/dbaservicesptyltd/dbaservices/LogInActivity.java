@@ -7,9 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,7 +39,7 @@ public class LogInActivity extends Activity {
 
 		new DBAServiceApplication(LogInActivity.this);
 		String token = DBAServiceApplication.getAppAccessToken(LogInActivity.this);
-		if (!( token.equals(null) || token.equals("none") ) ) {
+		if (!(token.equals(null) || token.equals("none"))) {
 			Intent intent = new Intent(LogInActivity.this, MainActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
@@ -119,10 +117,10 @@ public class LogInActivity extends Activity {
 						completeLogin((JSONObject) responseObj.get("user"));
 					} else {
 						Log.e("Login_ERROR", responseObj.toString());
-						alert("Invalid log in data!");
+						// alert("Invalid log in data!");
 					}
 				} catch (JSONException e) {
-					alert("Exception occured during parsing the server response.");
+					// alert("Exception occured during parsing the server response.");
 					e.printStackTrace();
 				}
 			}
@@ -140,18 +138,18 @@ public class LogInActivity extends Activity {
 		finish();
 	}
 
-	void alert(String message) {
-		AlertDialog.Builder bld = new AlertDialog.Builder(LogInActivity.this);
-		bld.setMessage(message);
-		bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-
-			}
-		});
-		bld.create().show();
-	}
+	// void alert(String message) {
+	// AlertDialog.Builder bld = new AlertDialog.Builder(LogInActivity.this);
+	// bld.setMessage(message);
+	// bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// dialog.dismiss();
+	//
+	// }
+	// });
+	// bld.create().show();
+	// }
 
 }

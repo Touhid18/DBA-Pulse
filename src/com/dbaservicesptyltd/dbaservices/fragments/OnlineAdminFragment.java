@@ -7,10 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -197,11 +195,11 @@ public class OnlineAdminFragment extends Fragment {
 						onlineAdminAdapter.notifyDataSetChanged();
 						ivRefresh.clearAnimation();
 					} else {
-						alert("Invalid token!");
+						// alert("Invalid token!");
 						ivRefresh.clearAnimation();
 					}
 				} catch (JSONException e) {
-					alert("Exception.");
+					// alert("Exception.");
 					e.printStackTrace();
 				}
 			}
@@ -211,21 +209,22 @@ public class OnlineAdminFragment extends Fragment {
 		}
 	}
 
-	void alert(String message) {
-		try {
-			AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
-			bld.setMessage(message);
-			bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
-			bld.create().show();
-		} catch (Exception e) {
-			Log.e(TAG, "Exception inside alert() with message : " + message + "\n" + e.getMessage());
-		}
-	}
+	// void alert(String message) {
+	// try {
+	// AlertDialog.Builder bld = new AlertDialog.Builder(tContext);
+	// bld.setMessage(message);
+	// bld.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// dialog.dismiss();
+	// }
+	// });
+	// bld.create().show();
+	// } catch (Exception e) {
+	// Log.e(TAG, "Exception inside alert() with message : " + message + "\n" +
+	// e.getMessage());
+	// }
+	// }
 
 }
